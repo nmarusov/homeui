@@ -29,17 +29,18 @@ angular
     'gridshore.c3js.chart',
     'angular-json-editor'
   ])
-  .value("historyMaxPoints", 1000)
+  .value('historyMaxPoints', 1000)
   .config(function ($routeProvider, JSONEditorProvider, DumbTemplateProvider) {
     var DumbTemplate = null;
     JSONEditorProvider.configure({
       defaults: {
         options: {
-          show_errors: "always",
+          showErrors: 'always',
           template: {
             compile: function (template) {
-              if (!DumbTemplate)
+              if (!DumbTemplate) {
                 DumbTemplate = DumbTemplateProvider.$get();
+              }
               return DumbTemplate.compile(template);
             }
           }
@@ -149,8 +150,8 @@ angular
     $rootScope.objectsKeys = function(collection){
       return Object.keys(collection);
     };
-    $rootScope.$on( "$locationChangeStart", function(event, next, current) {
-      if(current.split('/').pop() != 'edit' && current.split('/').pop() != 'new') $rootScope.showCreated = false;
+    $rootScope.$on( '$locationChangeStart', function(event, next, current) {
+      if(current.split('/').pop() !== 'edit' && current.split('/').pop() !== 'new') { $rootScope.showCreated = false; }
       $rootScope.refererLocation = current;
     });
   }]);
