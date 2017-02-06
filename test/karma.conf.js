@@ -23,8 +23,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       // bower:js
-      'bower_components/jquery/dist/jquery.js',
       'bower_components/angular/angular.js',
+      'bower_components/jquery/dist/jquery.js',
       'bower_components/bootstrap/dist/js/bootstrap.js',
       'bower_components/angular-resource/angular-resource.js',
       'bower_components/angular-route/angular-route.js',
@@ -74,8 +74,7 @@ module.exports = function(config) {
     plugins: [
       'karma-ng-html2js-preprocessor',
       'karma-chrome-launcher',
-      'karma-jasmine',
-      'karma-emacs-reporter'
+      'karma-jasmine'
     ],
 
     // Continuous Integration mode
@@ -88,7 +87,7 @@ module.exports = function(config) {
     // possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
     logLevel: config.LOG_INFO,
 
-    reporters: [ "dots", "emacs" ],
+    reporters: [ "dots" ],
 
     ngHtml2JsPreprocessor: {
       stripPrefix: "^([^/]*)",

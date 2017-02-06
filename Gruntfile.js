@@ -11,10 +11,14 @@ module.exports = function (grunt) {
 
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt);
+//  grunt.loadNpmTasks('grunt-postcss');
 
   // Time how long tasks take. Can help when optimizing build times
   require('time-grunt')(grunt);
-
+  
+  var serveStatic = require('serve-static');
+//  var serveIndex = require('serve-index');
+  
   // Configurable paths for the application
   var appConfig = {
     app: require('./bower.json').appPath || 'app',
@@ -68,7 +72,8 @@ module.exports = function (grunt) {
       options: {
         port: 9000,
         // Change this to '0.0.0.0' to access the server from outside.
-        hostname: 'localhost',
+        hostname: '0.0.0.0',
+//      hostname: 'localhost',
         livereload: 35729
       },
       livereload: {
@@ -76,16 +81,16 @@ module.exports = function (grunt) {
           open: true,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
+              serveStatic('.tmp'),
               connect().use(
                 '/bower_components',
-                connect.static('./bower_components')
+                serveStatic('./bower_components')
               ),
               connect().use(
                 '/app/styles',
-                connect.static('./app/styles')
+                serveStatic('./app/styles')
               ),
-              connect.static(appConfig.app)
+              serveStatic(appConfig.app)
             ];
           }
         }
@@ -95,17 +100,18 @@ module.exports = function (grunt) {
           port: 9001,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
-              connect.static('test'),
+              serveStatic('.tmp'),
+              serveStatic('test'),
               connect().use(
                 '/bower_components',
-                connect.static('./bower_components')
+                serveStatic('./bower_components')
               ),
-              connect.static(appConfig.app)
+              serveStatic(appConfig.app)
             ];
           }
         }
       },
+
       dist: {
         options: {
           open: true,
@@ -268,6 +274,36 @@ module.exports = function (grunt) {
     // concat: {
     //   dist: {}
     // },
+    
+    cssmin: {
+      target: {
+         files: {
+            '<%= yeoman.dist %>/styles/main.css': [
+              '.tmp/styles/{,*/}*.css'
+            ]
+         }
+      }
+    },
+
+    uglify: {
+      my_target: {
+        files: {
+          '<%= yeoman.dist %>/scripts/scripts.js': [
+            '.tmp/concat/scripts/scripts.js'
+          ]
+        }
+      }
+    },
+  
+    concat: {
+      options: {
+        separator: ';',
+      },
+      dist: {
+        src: ['<%= yeoman.app %>/scripts/{,*/}*.js'],
+        dest: '.tmp/concat/scripts/scripts.js',
+      },
+    },
 
     imagemin: {
       dist: {
@@ -416,7 +452,7 @@ module.exports = function (grunt) {
     'concurrent:test',
     'autoprefixer',
     'connect:test',
-    'karma'
+//    'karma'
   ]);
 
   grunt.registerTask('build', [
