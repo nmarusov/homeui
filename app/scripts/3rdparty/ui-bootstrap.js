@@ -5,8 +5,11 @@
  * Version: 0.13.3 - 2015-08-09
  * License: MIT
  */
-angular.module("ui.bootstrap", ["ui.bootstrap.tpls","ui.bootstrap.datepicker","ui.bootstrap.dateparser","ui.bootstrap.position"]);
-angular.module("ui.bootstrap.tpls", ["template/datepicker/datepicker.html","template/datepicker/day.html","template/datepicker/month.html","template/datepicker/popup.html","template/datepicker/year.html"]);
+ 
+'use strict';
+
+angular.module('ui.bootstrap', ['ui.bootstrap.tpls','ui.bootstrap.datepicker','ui.bootstrap.dateparser','ui.bootstrap.position']);
+angular.module('ui.bootstrap.tpls', ['template/datepicker/datepicker.html','template/datepicker/day.html','template/datepicker/month.html','template/datepicker/popup.html','template/datepicker/year.html']);
 angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootstrap.position'])
 
 .value('$datepickerSuppressError', false)
@@ -59,7 +62,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
       $scope.$parent.$watch($parse($attrs[key]), function(value) {
         self[key] = angular.isDefined(value) ? value : $attrs[key];
         $scope[key] = self[key];
-        if ((key == 'minMode' && self.modes.indexOf( $scope.datepickerMode ) < self.modes.indexOf( self[key] )) || (key == 'maxMode' && self.modes.indexOf( $scope.datepickerMode ) > self.modes.indexOf( self[key] ))) {
+        if ((key === 'minMode' && self.modes.indexOf( $scope.datepickerMode ) < self.modes.indexOf( self[key] )) || (key === 'maxMode' && self.modes.indexOf( $scope.datepickerMode ) > self.modes.indexOf( self[key] ))) {
           $scope.datepickerMode = self[key];
         }
       });
@@ -576,7 +579,7 @@ function ($compile, $parse, $document, $rootScope, $position, dateFilter, datePa
       datepickerEl.attr('template-url', datepickerTemplateUrl);
 
       if (isHtml5DateInput) {
-        if (attrs.type == 'month') {
+        if (attrs.type === 'month') {
           datepickerEl.attr('datepicker-mode', '"month"');
           datepickerEl.attr('min-mode', 'month');
         }
@@ -1057,7 +1060,7 @@ angular.module('ui.bootstrap.position', [])
         var elBCR = this.offset(element);
         var offsetParentBCR = { top: 0, left: 0 };
         var offsetParentEl = parentOffsetEl(element[0]);
-        if (offsetParentEl != $document[0]) {
+        if (offsetParentEl !== $document[0]) {
           offsetParentBCR = this.offset(angular.element(offsetParentEl));
           offsetParentBCR.top += offsetParentEl.clientTop - offsetParentEl.scrollTop;
           offsetParentBCR.left += offsetParentEl.clientLeft - offsetParentEl.scrollLeft;
@@ -1160,8 +1163,8 @@ angular.module('ui.bootstrap.position', [])
     };
   }]);
 
-angular.module("template/datepicker/datepicker.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/datepicker.html",
+angular.module('template/datepicker/datepicker.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/datepicker/datepicker.html',
     "<div ng-switch=\"datepickerMode\" role=\"application\" ng-keydown=\"keydown($event)\">\n" +
     "  <daypicker ng-switch-when=\"day\" tabindex=\"0\"></daypicker>\n" +
     "  <monthpicker ng-switch-when=\"month\" tabindex=\"0\"></monthpicker>\n" +
@@ -1195,8 +1198,8 @@ angular.module("template/datepicker/day.html", []).run(["$templateCache", functi
     "");
 }]);
 
-angular.module("template/datepicker/month.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/month.html",
+angular.module('template/datepicker/month.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/datepicker/month.html',
     "<table role=\"grid\" aria-labelledby=\"{{::uniqueId}}-title\" aria-activedescendant=\"{{activeDateId}}\">\n" +
     "  <thead>\n" +
     "    <tr>\n" +
@@ -1216,23 +1219,23 @@ angular.module("template/datepicker/month.html", []).run(["$templateCache", func
     "");
 }]);
 
-angular.module("template/datepicker/popup.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/popup.html",
+angular.module('template/datepicker/popup.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/datepicker/popup.html',
     "<ul class=\"dropdown-menu\" ng-if=\"isOpen\" style=\"display: block\" ng-style=\"{top: position.top+'px', left: position.left+'px'}\" ng-keydown=\"keydown($event)\" ng-click=\"$event.stopPropagation()\">\n" +
-    "	<li ng-transclude></li>\n" +
-    "	<li ng-if=\"showButtonBar\" style=\"padding:10px 9px 2px\">\n" +
-    "		<span class=\"btn-group pull-left\">\n" +
-    "			<button type=\"button\" class=\"btn btn-sm btn-info\" ng-click=\"select('today')\">{{ getText('current') }}</button>\n" +
-    "			<button type=\"button\" class=\"btn btn-sm btn-danger\" ng-click=\"select(null)\">{{ getText('clear') }}</button>\n" +
-    "		</span>\n" +
-    "		<button type=\"button\" class=\"btn btn-sm btn-success pull-right\" ng-click=\"close()\">{{ getText('close') }}</button>\n" +
-    "	</li>\n" +
+    "  <li ng-transclude></li>\n" +
+    "  <li ng-if=\"showButtonBar\" style=\"padding:10px 9px 2px\">\n" +
+    "    <span class=\"btn-group pull-left\">\n" +
+    "      <button type=\"button\" class=\"btn btn-sm btn-info\" ng-click=\"select('today')\">{{ getText('current') }}</button>\n" +
+    "      <button type=\"button\" class=\"btn btn-sm btn-danger\" ng-click=\"select(null)\">{{ getText('clear') }}</button>\n" +
+    "    </span>\n" +
+    "    <button type=\"button\" class=\"btn btn-sm btn-success pull-right\" ng-click=\"close()\">{{ getText('close') }}</button>\n" +
+    "  </li>\n" +
     "</ul>\n" +
     "");
 }]);
 
-angular.module("template/datepicker/year.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/year.html",
+angular.module('template/datepicker/year.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/datepicker/year.html',
     "<table role=\"grid\" aria-labelledby=\"{{::uniqueId}}-title\" aria-activedescendant=\"{{activeDateId}}\">\n" +
     "  <thead>\n" +
     "    <tr>\n" +

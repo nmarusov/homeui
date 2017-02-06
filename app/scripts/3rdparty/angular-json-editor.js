@@ -13,16 +13,6 @@ angular.module('angular-json-editor', []).provider('JSONEditor', function () {
         }
     };
 
-    this.configure = function (options) {
-        extendDeep(configuration, options);
-    };
-
-    this.$get = ['$window', function ($window) {
-        var JSONEditor = $window.JSONEditor;
-        extendDeep(JSONEditor, configuration);
-        return $window.JSONEditor;
-    }];
-
     function extendDeep(dst) {
         angular.forEach(arguments, function (obj) {
             if (obj !== dst) {
@@ -37,6 +27,17 @@ angular.module('angular-json-editor', []).provider('JSONEditor', function () {
         });
         return dst;
     }
+    
+    this.configure = function (options) {
+        extendDeep(configuration, options);
+    };
+
+    this.$get = ['$window', function ($window) {
+        var JSONEditor = $window.JSONEditor;
+        extendDeep(JSONEditor, configuration);
+        return $window.JSONEditor;
+    }];
+
 
 }).directive('jsonEditor', ['$q', 'JSONEditor', function ($q, JSONEditor) {
 
@@ -46,7 +47,7 @@ angular.module('angular-json-editor', []).provider('JSONEditor', function () {
         scope: {
             schema: '=',
             startval: '=',
-            options: "=",
+            options: '=',
             buttonsController: '@',
             onChange: '&'
         },
@@ -104,9 +105,9 @@ angular.module('angular-json-editor', []).provider('JSONEditor', function () {
                 // Commit changes in text fields immediately.
                 // FIXME: should make this an option (and perhaps file a pull request for JSONEditor)
                 // FIXME: ipv4 input type seems to be an invention of JSONEditor author
-                element.on("input", "input[type=text], input[type=ipv4], textarea", function () {
-                    var e = document.createEvent("HTMLEvents");
-                    e.initEvent("change", false, true);
+                element.on('input', 'input[type=text], input[type=ipv4], textarea', function () {
+                    var e = document.createEvent('HTMLEvents');
+                    e.initEvent('change', false, true);
                     this.dispatchEvent(e);
                 });
 
@@ -114,8 +115,9 @@ angular.module('angular-json-editor', []).provider('JSONEditor', function () {
                     startval: startVal,
                     schema: schema
                 };
-                if (scope.options)
+                if (scope.options) {
                     angular.extend(options, scope.options);
+                }
                 scope.editor = new JSONEditor(element[0], options);
 
                 var editor = scope.editor;

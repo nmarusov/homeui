@@ -9,6 +9,8 @@
  * See README.md for requirements and usage info
  */
 
+'use strict';
+
 (function() {
 
 /*jshint loopfunc: true */
@@ -19,13 +21,13 @@
 // Inspired by base2 and Prototype
 var Class;
 (function(){
-  var initializing = false, fnTest = /xyz/.test(function(){window.postMessage("xyz");}) ? /\b_super\b/ : /.*/;
+  var initializing = false, fnTest = /xyz/.test(function(){window.postMessage('xyz');}) ? /\bSuper\b/ : /.*/;
  
   // The base Class implementation (does nothing)
   Class = function(){};
  
   // Create a new Class that inherits from this class
-  Class.extend = function(prop) {
+  Class.extend = function extendClass(prop) {
     var _super = this.prototype;
    
     // Instantiate a base class (but only create the instance,
@@ -37,8 +39,8 @@ var Class;
     // Copy the properties over onto the new prototype
     for (var name in prop) {
       // Check if we're overwriting an existing function
-      prototype[name] = typeof prop[name] == "function" &&
-        typeof _super[name] == "function" && fnTest.test(prop[name]) ?
+      prototype[name] = typeof prop[name] === 'function' &&
+        typeof _super[name] === 'function' && fnTest.test(prop[name]) ?
         (function(name, fn){
           return function() {
             var tmp = this._super;
@@ -61,8 +63,9 @@ var Class;
     // The dummy class constructor
     function Class() {
       // All construction is actually done in the init method
-      if ( !initializing && this.init )
+      if ( !initializing && this.init ) {
         this.init.apply(this, arguments);
+      }
     }
    
     // Populate our constructed prototype object
@@ -72,7 +75,7 @@ var Class;
     Class.prototype.constructor = Class;
  
     // And make this class extendable
-    Class.extend = arguments.callee;
+    Class.extend = extendClass;
    
     return Class;
   };
@@ -106,7 +109,7 @@ var Class;
                                       window[vendors[x]+'CancelRequestAnimationFrame'];
     }
  
-    if (!window.requestAnimationFrame)
+    if (!window.requestAnimationFrame) {
         window.requestAnimationFrame = function(callback, element) {
             var currTime = new Date().getTime();
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
@@ -115,21 +118,23 @@ var Class;
             lastTime = currTime + timeToCall;
             return id;
         };
+    }
  
-    if (!window.cancelAnimationFrame)
+    if (!window.cancelAnimationFrame) {
         window.cancelAnimationFrame = function(id) {
             clearTimeout(id);
         };
+    }
 }());
 
 // Array.isArray polyfill
 // From MDN
 (function() {
-	if(!Array.isArray) {
-	  Array.isArray = function(arg) {
-		return Object.prototype.toString.call(arg) === '[object Array]';
-	  };
-	}
+  if(!Array.isArray) {
+    Array.isArray = function(arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+  }
 }());
 /**
  * Taken from jQuery 2.1.3
@@ -139,14 +144,14 @@ var Class;
  */
 var $isplainobject = function( obj ) {
   // Not plain objects:
-  // - Any object or value whose internal [[Class]] property is not "[object Object]"
+  // - Any object or value whose internal [[Class]] property is not '[object Object]'
   // - DOM nodes
   // - window
-  if (typeof obj !== "object" || obj.nodeType || (obj !== null && obj === obj.window)) {
+  if (typeof obj !== 'object' || obj.nodeType || (obj !== null && obj === obj.window)) {
     return false;
   }
 
-  if (obj.constructor && !Object.prototype.hasOwnProperty.call(obj.constructor.prototype, "isPrototypeOf")) {
+  if (obj.constructor && !Object.prototype.hasOwnProperty.call(obj.constructor.prototype, 'isPrototypeOf')) {
     return false;
   }
 
@@ -160,9 +165,9 @@ var $extend = function(destination) {
   for(i=1; i<arguments.length; i++) {
     source = arguments[i];
     for (property in source) {
-      if(!source.hasOwnProperty(property)) continue;
+      if(!source.hasOwnProperty(property)) { continue; }
       if(source[property] && $isplainobject(source[property])) {
-        if(!destination.hasOwnProperty(property)) destination[property] = {};
+        if(!destination.hasOwnProperty(property)) { destination[property] = {}; }
         $extend(destination[property], source[property]);
       }
       else {
@@ -178,24 +183,24 @@ var $extend = function(destination) {
 };
 
 var $each = function(obj,callback) {
-  if(!obj || typeof obj !== "object") return;
+  if(!obj || typeof obj !== 'object') { return; }
   var i;
   if(Array.isArray(obj) || (typeof obj.length === 'number' && obj.length > 0 && (obj.length - 1) in obj)) {
     for(i=0; i<obj.length; i++) {
-      if(callback(i,obj[i])===false) return;
+      if(callback(i,obj[i])===false) { return; }
     }
   }
   else {
     if (Object.keys) {
       var keys = Object.keys(obj);
       for(i=0; i<keys.length; i++) {
-        if(callback(keys[i],obj[keys[i]])===false) return;
+        if(callback(keys[i],obj[keys[i]])===false) { return; }
       }
     }
     else {
       for(i in obj) {
-        if(!obj.hasOwnProperty(i)) continue;
-        if(callback(i,obj[i])===false) return;
+        if(!obj.hasOwnProperty(i)) { continue; }
+        if(callback(i,obj[i])===false) { return; }
       }
     }
   }
@@ -233,21 +238,21 @@ JSONEditor.prototype = {
     
     this.ready = false;
 
-    var theme_class = JSONEditor.defaults.themes[this.options.theme || JSONEditor.defaults.theme];
-    if(!theme_class) throw "Unknown theme " + (this.options.theme || JSONEditor.defaults.theme);
+    var ThemeClass = JSONEditor.defaults.themes[this.options.theme || JSONEditor.defaults.theme];
+    if(!ThemeClass) { throw 'Unknown theme ' + (this.options.theme || JSONEditor.defaults.theme); }
     
     this.schema = this.options.schema;
-    this.theme = new theme_class();
+    this.theme = new ThemeClass();
     this.template = this.options.template;
     this.refs = this.options.refs || {};
     this.uuid = 0;
     this.__data = {};
     
-    var icon_class = JSONEditor.defaults.iconlibs[this.options.iconlib || JSONEditor.defaults.iconlib];
-    if(icon_class) this.iconlib = new icon_class();
+    var IconClass = JSONEditor.defaults.iconlibs[this.options.iconlib || JSONEditor.defaults.iconlib];
+    if(IconClass) { this.iconlib = new IconClass(); }
 
-    this.root_container = this.theme.getContainer();
-    this.element.appendChild(this.root_container);
+    this.rootContainer = this.theme.getContainer();
+    this.element.appendChild(this.rootContainer);
     
     this.translate = this.options.translate || JSONEditor.defaults.translate;
 
@@ -257,12 +262,12 @@ JSONEditor.prototype = {
       self.validator = new JSONEditor.Validator(self);
       
       // Create the root editor
-      var editor_class = self.getEditorClass(self.schema);
-      self.root = self.createEditor(editor_class, {
+      var EditorClass = self.getEditorClass(self.schema);
+      self.root = self.createEditor(EditorClass, {
         jsoneditor: self,
         schema: self.schema,
         required: true,
-        container: self.root_container
+        container: self.rootContainer
       });
       
       self.root.preBuild();
@@ -270,35 +275,35 @@ JSONEditor.prototype = {
       self.root.postBuild();
 
       // Starting data
-      if(self.options.startval) self.root.setValue(self.options.startval);
+      if(self.options.startval) { self.root.setValue(self.options.startval); }
 
-      self.validation_results = self.validator.validate(self.root.getValue());
-      self.root.showValidationErrors(self.validation_results);
+      self.validationResults = self.validator.validate(self.root.getValue());
+      self.root.showValidationErrors(self.validationResults);
       self.ready = true;
 
       // Fire ready event asynchronously
       window.requestAnimationFrame(function() {
-        if(!self.ready) return;
-        self.validation_results = self.validator.validate(self.root.getValue());
-        self.root.showValidationErrors(self.validation_results);
+        if(!self.ready) { return; }
+        self.validationResults = self.validator.validate(self.root.getValue());
+        self.root.showValidationErrors(self.validationResults);
         self.trigger('ready');
         self.trigger('change');
       });
     });
   },
   getValue: function() {
-    if(!this.ready) throw "JSON Editor not ready yet.  Listen for 'ready' event before getting the value";
+    if(!this.ready) { throw "JSON Editor not ready yet.  Listen for 'ready' event before getting the value"; }
 
     return this.root.getValue();
   },
   setValue: function(value) {
-    if(!this.ready) throw "JSON Editor not ready yet.  Listen for 'ready' event before setting the value";
+    if(!this.ready) { throw "JSON Editor not ready yet.  Listen for 'ready' event before setting the value"; }
 
     this.root.setValue(value);
     return this;
   },
   validate: function(value) {
-    if(!this.ready) throw "JSON Editor not ready yet.  Listen for 'ready' event before validating";
+    if(!this.ready) { throw "JSON Editor not ready yet.  Listen for 'ready' event before validating"; }
     
     // Custom value
     if(arguments.length === 1) {
@@ -306,20 +311,20 @@ JSONEditor.prototype = {
     }
     // Current value (use cached result)
     else {
-      return this.validation_results;
+      return this.validationResults;
     }
   },
   destroy: function() {
-    if(this.destroyed) return;
-    if(!this.ready) return;
+    if(this.destroyed) { return; }
+    if(!this.ready) { return; }
     
     this.schema = null;
     this.options = null;
     this.root.destroy();
     this.root = null;
-    this.root_container = null;
+    this.rootContainer = null;
     this.validator = null;
-    this.validation_results = null;
+    this.validationResults = null;
     this.theme = null;
     this.iconlib = null;
     this.template = null;
@@ -343,7 +348,7 @@ JSONEditor.prototype = {
       this.callbacks[event] = this.callbacks[event] || [];
       var newcallbacks = [];
       for(var i=0; i<this.callbacks[event].length; i++) {
-        if(this.callbacks[event][i]===callback) continue;
+        if(this.callbacks[event][i]===callback) { continue; }
         newcallbacks.push(this.callbacks[event][i]);
       }
       this.callbacks[event] = newcallbacks;
@@ -370,13 +375,13 @@ JSONEditor.prototype = {
     return this;
   },
   setOption: function(option, value) {
-    if(option === "show_errors") {
-      this.options.show_errors = value;
+    if(option === 'showErrors') {
+      this.options.showErrors = value;
       this.onChange();
     }
-    // Only the `show_errors` option is supported for now
+    // Only the `showErrors` option is supported for now
     else {
-      throw "Option "+option+" must be set during instantiation and cannot be changed later";
+      throw 'Option '+option+' must be set during instantiation and cannot be changed later';
     }
     
     return this;
@@ -396,32 +401,32 @@ JSONEditor.prototype = {
       }
     });
 
-    if(!classname) throw "Unknown editor for schema "+JSON.stringify(schema);
-    if(!JSONEditor.defaults.editors[classname]) throw "Unknown editor "+classname;
+    if(!classname) { throw 'Unknown editor for schema '+JSON.stringify(schema); }
+    if(!JSONEditor.defaults.editors[classname]) { throw 'Unknown editor '+classname; }
 
     return JSONEditor.defaults.editors[classname];
   },
-  createEditor: function(editor_class, options) {
-    options = $extend({},editor_class.options||{},options);
-    return new editor_class(options);
+  createEditor: function(EditorClass, options) {
+    options = $extend({},EditorClass.options||{},options);
+    return new EditorClass(options);
   },
   onChange: function() {
-    if(!this.ready) return;
+    if(!this.ready) { return; }
     
-    if(this.firing_change) return;
-    this.firing_change = true;
+    if(this.firingChange) { return; }
+    this.firingChange = true;
     
     var self = this;
     
     window.requestAnimationFrame(function() {
-      self.firing_change = false;
-      if(!self.ready) return;
+      self.firingChange = false;
+      if(!self.ready) { return; }
 
       // Validate and cache results
-      self.validation_results = self.validator.validate(self.root.getValue());
+      self.validationResults = self.validator.validate(self.root.getValue());
       
-      if(self.options.show_errors !== "never") {
-        self.root.showValidationErrors(self.validation_results);
+      if(self.options.showErrors !== 'never') {
+        self.root.showValidationErrors(self.validationResults);
       }
       else {
         self.root.showValidationErrors([]);
@@ -440,18 +445,18 @@ JSONEditor.prototype = {
 
     // Specifying a preset engine
     if(typeof name === 'string') {
-      if(!JSONEditor.defaults.templates[name]) throw "Unknown template engine "+name;
+      if(!JSONEditor.defaults.templates[name]) { throw 'Unknown template engine '+name; }
       engine = JSONEditor.defaults.templates[name]();
 
-      if(!engine) throw "Template engine "+name+" missing required library.";
+      if(!engine) { throw 'Template engine '+name+' missing required library.'; }
     }
     // Specifying a custom engine
     else {
       engine = name;
     }
 
-    if(!engine) throw "No template engine set";
-    if(!engine.compile) throw "Invalid template engine set";
+    if(!engine) { throw 'No template engine set'; }
+    if(!engine.compile) { throw 'Invalid template engine set'; }
 
     return engine.compile(template);
   },
@@ -472,7 +477,7 @@ JSONEditor.prototype = {
     // Getting data
     else {
       // No data stored
-      if(!el.hasAttribute('data-jsoneditor-'+key)) return null;
+      if(!el.hasAttribute('data-jsoneditor-'+key)) { return null;}
       
       return this.__data[el.getAttribute('data-jsoneditor-'+key)];
     }
@@ -488,7 +493,7 @@ JSONEditor.prototype = {
     return this;
   },
   getEditor: function(path) {
-    if(!this.editors) return;
+    if(!this.editors) { return; }
     return this.editors[path];
   },
   watch: function(path,callback) {
@@ -499,7 +504,7 @@ JSONEditor.prototype = {
     return this;
   },
   unwatch: function(path,callback) {
-    if(!this.watchlist || !this.watchlist[path]) return this;
+    if(!this.watchlist || !this.watchlist[path]) { return this; }
     // If removing all callbacks for a path
     if(!callback) {
       this.watchlist[path] = null;
@@ -508,14 +513,14 @@ JSONEditor.prototype = {
     
     var newlist = [];
     for(var i=0; i<this.watchlist[path].length; i++) {
-      if(this.watchlist[path][i] === callback) continue;
-      else newlist.push(this.watchlist[path][i]);
+      if(this.watchlist[path][i] === callback) { continue; }
+      else { newlist.push(this.watchlist[path][i]); }
     }
     this.watchlist[path] = newlist.length? newlist : null;
     return this;
   },
   notifyWatchers: function(path) {
-    if(!this.watchlist || !this.watchlist[path]) return this;
+    if(!this.watchlist || !this.watchlist[path]) { return this; }
     for(var i=0; i<this.watchlist[path].length; i++) {
       this.watchlist[path][i]();
     }
@@ -533,7 +538,7 @@ JSONEditor.prototype = {
     path = path || '#/definitions/';
     if(schema.definitions) {
       for(var i in schema.definitions) {
-        if(!schema.definitions.hasOwnProperty(i)) continue;
+        if(!schema.definitions.hasOwnProperty(i)) { continue; }
         this.refs[path+i] = schema.definitions[i];
         if(schema.definitions[i].definitions) {
           this._getDefinitions(schema.definitions[i],path+i+'/definitions/');
@@ -543,7 +548,7 @@ JSONEditor.prototype = {
   },
   _getExternalRefs: function(schema) {
     var refs = {};
-    var merge_refs = function(newrefs) {
+    var mergeRefs = function(newrefs) {
       for(var i in newrefs) {
         if(newrefs.hasOwnProperty(i)) {
           refs[i] = true;
@@ -551,21 +556,21 @@ JSONEditor.prototype = {
       }
     };
     
-    if(schema.$ref && typeof schema.$ref !== "object" && schema.$ref.substr(0,1) !== "#" && !this.refs[schema.$ref]) {
+    if(schema.$ref && typeof schema.$ref !== 'object' && schema.$ref.substr(0,1) !== '#' && !this.refs[schema.$ref]) {
       refs[schema.$ref] = true;
     }
     
     for(var i in schema) {
-      if(!schema.hasOwnProperty(i)) continue;
-      if(schema[i] && typeof schema[i] === "object" && Array.isArray(schema[i])) {
+      if(!schema.hasOwnProperty(i)) { continue; }
+      if(schema[i] && typeof schema[i] === 'object' && Array.isArray(schema[i])) {
         for(var j=0; j<schema[i].length; j++) {
-          if(typeof schema[i][j]==="object") {
-            merge_refs(this._getExternalRefs(schema[i][j]));
+          if(typeof schema[i][j]==='object') {
+            mergeRefs(this._getExternalRefs(schema[i][j]));
           }
         }
       }
-      else if(schema[i] && typeof schema[i] === "object") {
-        merge_refs(this._getExternalRefs(schema[i]));
+      else if(schema[i] && typeof schema[i] === 'object') {
+        mergeRefs(this._getExternalRefs(schema[i]));
       }
     }
     
@@ -575,18 +580,18 @@ JSONEditor.prototype = {
     var self = this;
     var refs = this._getExternalRefs(schema);
     
-    var done = 0, waiting = 0, callback_fired = false;
+    var done = 0, waiting = 0, callbackFired = false;
     
     $each(refs,function(url) {
-      if(self.refs[url]) return;
-      if(!self.options.ajax) throw "Must set ajax option to true to load external ref "+url;
+      if(self.refs[url]) { return; }
+      if(!self.options.ajax) { throw 'Must set ajax option to true to load external ref '+url; }
       self.refs[url] = 'loading';
       waiting++;
 
       var r = new XMLHttpRequest(); 
-      r.open("GET", url, true);
+      r.open('GET', url, true);
       r.onreadystatechange = function () {
-        if (r.readyState != 4) return; 
+        if (r.readyState !== 4) { return; }
         // Request succeeded
         if(r.status === 200) {
           var response;
@@ -595,15 +600,15 @@ JSONEditor.prototype = {
           }
           catch(e) {
             window.console.log(e);
-            throw "Failed to parse external ref "+url;
+            throw 'Failed to parse external ref '+url;
           }
-          if(!response || typeof response !== "object") throw "External ref does not contain a valid schema - "+url;
+          if(!response || typeof response !== 'object') { throw 'External ref does not contain a valid schema - '+url; }
           
           self.refs[url] = response;
           self._loadExternalRefs(response,function() {
             done++;
-            if(done >= waiting && !callback_fired) {
-              callback_fired = true;
+            if(done >= waiting && !callbackFired) {
+              callbackFired = true;
               callback();
             }
           });
@@ -611,7 +616,7 @@ JSONEditor.prototype = {
         // Request failed
         else {
           window.console.log(r);
-          throw "Failed to fetch ref via ajax- "+url;
+          throw 'Failed to fetch ref via ajax- '+url;
         }
       };
       r.send();
@@ -628,7 +633,7 @@ JSONEditor.prototype = {
       var ref = schema.$ref;
       delete schema.$ref;
       
-      if(!this.refs[ref]) ref = decodeURIComponent(ref);
+      if(!this.refs[ref]) { ref = decodeURIComponent(ref); }
       
       schema = this.extendSchemas(schema,this.refs[ref]);
     }
@@ -680,7 +685,7 @@ JSONEditor.prototype = {
     // Version 4 `dependencies` (schema dependencies)
     if(schema.dependencies) {
       $each(schema.dependencies,function(key,value) {
-        if(typeof value === "object" && !(Array.isArray(value))) {
+        if(typeof value === 'object' && !(Array.isArray(value))) {
           schema.dependencies[key] = self.expandSchema(value);
         }
       });
@@ -698,18 +703,18 @@ JSONEditor.prototype = {
       delete extended.allOf;
     }
     // extends schemas should be merged into parent
-    if(schema["extends"]) {
+    if(schema['extends']) {
       // If extends is a schema
-      if(!(Array.isArray(schema["extends"]))) {
-        extended = this.extendSchemas(extended,this.expandSchema(schema["extends"]));
+      if(!(Array.isArray(schema['extends']))) {
+        extended = this.extendSchemas(extended,this.expandSchema(schema['extends']));
       }
       // If extends is an array of schemas
       else {
-        for(i=0; i<schema["extends"].length; i++) {
-          extended = this.extendSchemas(extended,this.expandSchema(schema["extends"][i]));
+        for(i=0; i<schema['extends'].length; i++) {
+          extended = this.extendSchemas(extended,this.expandSchema(schema['extends'][i]));
         }
       }
-      delete extended["extends"];
+      delete extended['extends'];
     }
     // parent should be merged into oneOf schemas
     if(schema.oneOf) {
@@ -730,20 +735,20 @@ JSONEditor.prototype = {
     var extended = {};
     $each(obj1, function(prop,val) {
       // If this key is also defined in obj2, merge them
-      if(typeof obj2[prop] !== "undefined") {
+      if(typeof obj2[prop] !== 'undefined') {
         // Required arrays should be unioned together
-        if(prop === 'required' && typeof val === "object" && Array.isArray(val)) {
+        if(prop === 'required' && typeof val === 'object' && Array.isArray(val)) {
           // Union arrays and unique
           extended.required = val.concat(obj2[prop]).reduce(function(p, c) {
-            if (p.indexOf(c) < 0) p.push(c);
+            if (p.indexOf(c) < 0) { p.push(c); }
             return p;
           }, []);
         }
         // Type should be intersected and is either an array or string
-        else if(prop === 'type' && (typeof val === "string" || Array.isArray(val))) {
+        else if(prop === 'type' && (typeof val === 'string' || Array.isArray(val))) {
           // Make sure we're dealing with arrays
-          if(typeof val === "string") val = [val];
-          if(typeof obj2.type === "string") obj2.type = [obj2.type];
+          if(typeof val === 'string') { val = [val]; }
+          if(typeof obj2.type === 'string') { obj2.type = [obj2.type]; }
 
 
           extended.type = val.filter(function(n) {
@@ -751,18 +756,18 @@ JSONEditor.prototype = {
           });
 
           // If there's only 1 type and it's a primitive, use a string instead of array
-          if(extended.type.length === 1 && typeof extended.type[0] === "string") {
+          if(extended.type.length === 1 && typeof extended.type[0] === 'string') {
             extended.type = extended.type[0];
           }
         }
         // All other arrays should be intersected (enum, etc.)
-        else if(typeof val === "object" && Array.isArray(val)){
+        else if(typeof val === 'object' && Array.isArray(val)){
           extended[prop] = val.filter(function(n) {
             return obj2[prop].indexOf(n) !== -1;
           });
         }
         // Objects should be recursively merged
-        else if(typeof val === "object" && val !== null) {
+        else if(typeof val === 'object' && val !== null) {
           extended[prop] = self.extendSchemas(val,obj2[prop]);
         }
         // Otherwise, use the first value
@@ -777,7 +782,7 @@ JSONEditor.prototype = {
     });
     // Properties in obj2 that aren't in obj1
     $each(obj2, function(prop,val) {
-      if(typeof obj1[prop] === "undefined") {
+      if(typeof obj1[prop] === 'undefined') {
         extended[prop] = val;
       }
     });
@@ -793,7 +798,7 @@ JSONEditor.defaults = {
   editors: {},
   languages: {},
   resolvers: [],
-  custom_validators: []
+  customValidators: []
 };
 
 JSONEditor.Validator = Class.extend({
@@ -823,11 +828,11 @@ JSONEditor.Validator = Class.extend({
 
     // Version 3 `required`
     if(schema.required && schema.required === true) {
-      if(typeof value === "undefined") {
+      if(typeof value === 'undefined') {
         errors.push({
           path: path,
           property: 'required',
-          message: this.translate("error_notset")
+          message: this.translate('errorNotset')
         });
 
         // Can't do any more validation at this point
@@ -835,13 +840,13 @@ JSONEditor.Validator = Class.extend({
       }
     }
     // Value not defined
-    else if(typeof value === "undefined") {
-      // If required_by_default is set, all fields are required
-      if(this.jsoneditor.options.required_by_default) {
+    else if(typeof value === 'undefined') {
+      // If requiredByDefault is set, all fields are required
+      if(this.jsoneditor.options.requiredByDefault) {
         errors.push({
           path: path,
           property: 'required',
-          message: this.translate("error_notset")
+          message: this.translate('errorNotset')
         });
       }
       // Not required, no further validation needed
@@ -851,24 +856,24 @@ JSONEditor.Validator = Class.extend({
     }
 
     // `enum`
-    if(schema["enum"]) {
+    if(schema['enum']) {
       valid = false;
-      for(i=0; i<schema["enum"].length; i++) {
-        if(stringified === JSON.stringify(schema["enum"][i])) valid = true;
+      for(i=0; i<schema['enum'].length; i++) {
+        if(stringified === JSON.stringify(schema['enum'][i])) { valid = true; }
       }
       if(!valid) {
         errors.push({
           path: path,
           property: 'enum',
-          message: this.translate("error_enum")
+          message: this.translate('errorEnum')
         });
       }
     }
 
     // `extends` (version 3)
-    if(schema["extends"]) {
-      for(i=0; i<schema["extends"].length; i++) {
-        errors = errors.concat(this._validateSchema(schema["extends"][i],value,path));
+    if(schema['extends']) {
+      for(i=0; i<schema['extends'].length; i++) {
+        errors = errors.concat(this._validateSchema(schema['extends'][i],value,path));
       }
     }
 
@@ -892,7 +897,7 @@ JSONEditor.Validator = Class.extend({
         errors.push({
           path: path,
           property: 'anyOf',
-          message: this.translate('error_anyOf')
+          message: this.translate('errorAnyOf')
         });
       }
     }
@@ -900,7 +905,7 @@ JSONEditor.Validator = Class.extend({
     // `oneOf`
     if(schema.oneOf) {
       valid = 0;
-      var oneof_errors = [];
+      var oneofErrors = [];
       for(i=0; i<schema.oneOf.length; i++) {
         // Set the error paths to be path.oneOf[i].rest.of.path
         var tmp = this._validateSchema(schema.oneOf[i],value,path);
@@ -911,16 +916,16 @@ JSONEditor.Validator = Class.extend({
         for(j=0; j<tmp.length; j++) {
           tmp[j].path = path+'.oneOf['+i+']'+tmp[j].path.substr(path.length);
         }
-        oneof_errors = oneof_errors.concat(tmp);
+        oneofErrors = oneofErrors.concat(tmp);
 
       }
       if(valid !== 1) {
         errors.push({
           path: path,
           property: 'oneOf',
-          message: this.translate('error_oneOf', [valid])
+          message: this.translate('errorOneOf', [valid])
         });
-        errors = errors.concat(oneof_errors);
+        errors = errors.concat(oneofErrors);
       }
     }
 
@@ -930,7 +935,7 @@ JSONEditor.Validator = Class.extend({
         errors.push({
           path: path,
           property: 'not',
-          message: this.translate('error_not')
+          message: this.translate('errorNot')
         });
       }
     }
@@ -950,7 +955,7 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'type',
-            message: this.translate('error_type_union')
+            message: this.translate('errorTypeUnion')
           });
         }
       }
@@ -960,7 +965,7 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'type',
-            message: this.translate('error_type', [schema.type])
+            message: this.translate('errorType', [schema.type])
           });
         }
       }
@@ -982,7 +987,7 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'disallow',
-            message: this.translate('error_disallow_union')
+            message: this.translate('errorDisallowUnion')
           });
         }
       }
@@ -992,7 +997,7 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'disallow',
-            message: this.translate('error_disallow', [schema.disallow])
+            message: this.translate('errorDisallow', [schema.disallow])
           });
         }
       }
@@ -1003,7 +1008,7 @@ JSONEditor.Validator = Class.extend({
      */
 
     // Number Specific Validation
-    if(typeof value === "number") {
+    if(typeof value === 'number') {
       // `multipleOf` and `divisibleBy`
       if(schema.multipleOf || schema.divisibleBy) {
         valid = value / (schema.multipleOf || schema.divisibleBy);
@@ -1011,7 +1016,7 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: schema.multipleOf? 'multipleOf' : 'divisibleBy',
-            message: this.translate('error_multipleOf', [schema.multipleOf || schema.divisibleBy])
+            message: this.translate('errorMultipleOf', [schema.multipleOf || schema.divisibleBy])
           });
         }
       }
@@ -1022,14 +1027,14 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'maximum',
-            message: this.translate('error_maximum_excl', [schema.maximum])
+            message: this.translate('errorMaximumExcl', [schema.maximum])
           });
         }
         else if(!schema.exclusiveMaximum && value > schema.maximum) {
           errors.push({
             path: path,
             property: 'maximum',
-            message: this.translate('error_maximum_incl', [schema.maximum])
+            message: this.translate('errorMaximumIncl', [schema.maximum])
           });
         }
       }
@@ -1040,38 +1045,38 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'minimum',
-            message: this.translate('error_minimum_excl', [schema.minimum])
+            message: this.translate('errorMinimumExcl', [schema.minimum])
           });
         }
         else if(!schema.exclusiveMinimum && value < schema.minimum) {
           errors.push({
             path: path,
             property: 'minimum',
-            message: this.translate('error_minimum_incl', [schema.minimum])
+            message: this.translate('errorMinimumIncl', [schema.minimum])
           });
         }
       }
     }
     // String specific validation
-    else if(typeof value === "string") {
+    else if(typeof value === 'string') {
       // `maxLength`
       if(schema.maxLength) {
-        if((value+"").length > schema.maxLength) {
+        if((value+'').length > schema.maxLength) {
           errors.push({
             path: path,
             property: 'maxLength',
-            message: this.translate('error_maxLength', [schema.maxLength])
+            message: this.translate('errorMaxLength', [schema.maxLength])
           });
         }
       }
 
       // `minLength`
       if(schema.minLength) {
-        if((value+"").length < schema.minLength) {          
+        if((value+'').length < schema.minLength) {
           errors.push({
             path: path,
             property: 'minLength',
-            message: this.translate((schema.minLength===1?'error_notempty':'error_minLength'), [schema.minLength])
+            message: this.translate((schema.minLength===1?'errorNotempty':'errorMinLength'), [schema.minLength])
           });
         }
       }
@@ -1082,13 +1087,13 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'pattern',
-            message: this.translate('error_pattern')
+            message: this.translate('errorPattern')
           });
         }
       }
     }
     // Array specific validation
-    else if(typeof value === "object" && value !== null && Array.isArray(value)) {
+    else if(typeof value === 'object' && value !== null && Array.isArray(value)) {
       // `items` and `additionalItems`
       if(schema.items) {
         // `items` is an array
@@ -1113,7 +1118,7 @@ JSONEditor.Validator = Class.extend({
               errors.push({
                 path: path,
                 property: 'additionalItems',
-                message: this.translate('error_additionalItems')
+                message: this.translate('errorAdditionalItems')
               });
               break;
             }
@@ -1138,7 +1143,7 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'maxItems',
-            message: this.translate('error_maxItems', [schema.maxItems])
+            message: this.translate('errorMaxItems', [schema.maxItems])
           });
         }
       }
@@ -1149,7 +1154,7 @@ JSONEditor.Validator = Class.extend({
           errors.push({
             path: path,
             property: 'minItems',
-            message: this.translate('error_minItems', [schema.minItems])
+            message: this.translate('errorMinItems', [schema.minItems])
           });
         }
       }
@@ -1163,7 +1168,7 @@ JSONEditor.Validator = Class.extend({
             errors.push({
               path: path,
               property: 'uniqueItems',
-              message: this.translate('error_uniqueItems')
+              message: this.translate('errorUniqueItems')
             });
             break;
           }
@@ -1172,19 +1177,19 @@ JSONEditor.Validator = Class.extend({
       }
     }
     // Object specific validation
-    else if(typeof value === "object" && value !== null) {
+    else if(typeof value === 'object' && value !== null) {
       // `maxProperties`
       if(schema.maxProperties) {
         valid = 0;
         for(i in value) {
-          if(!value.hasOwnProperty(i)) continue;
+          if(!value.hasOwnProperty(i)) { continue; }
           valid++;
         }
         if(valid > schema.maxProperties) {
           errors.push({
             path: path,
             property: 'maxProperties',
-            message: this.translate('error_maxProperties', [schema.maxProperties])
+            message: this.translate('errorMaxProperties', [schema.maxProperties])
           });
         }
       }
@@ -1193,14 +1198,14 @@ JSONEditor.Validator = Class.extend({
       if(schema.minProperties) {
         valid = 0;
         for(i in value) {
-          if(!value.hasOwnProperty(i)) continue;
+          if(!value.hasOwnProperty(i)) { continue; }
           valid++;
         }
         if(valid < schema.minProperties) {
           errors.push({
             path: path,
             property: 'minProperties',
-            message: this.translate('error_minProperties', [schema.minProperties])
+            message: this.translate('errorMinProperties', [schema.minProperties])
           });
         }
       }
@@ -1208,22 +1213,22 @@ JSONEditor.Validator = Class.extend({
       // Version 4 `required`
       if(schema.required && Array.isArray(schema.required)) {
         for(i=0; i<schema.required.length; i++) {
-          if(typeof value[schema.required[i]] === "undefined") {
+          if(typeof value[schema.required[i]] === 'undefined') {
             errors.push({
               path: path,
               property: 'required',
-              message: this.translate('error_required', [schema.required[i]])
+              message: this.translate('errorRequired', [schema.required[i]])
             });
           }
         }
       }
 
       // `properties`
-      var validated_properties = {};
+      var validatedProperties = {};
       if(schema.properties) {
         for(i in schema.properties) {
-          if(!schema.properties.hasOwnProperty(i)) continue;
-          validated_properties[i] = true;
+          if(!schema.properties.hasOwnProperty(i)) { continue; }
+          validatedProperties[i] = true;
           errors = errors.concat(this._validateSchema(schema.properties[i],value[i],path+'.'+i));
         }
       }
@@ -1231,37 +1236,37 @@ JSONEditor.Validator = Class.extend({
       // `patternProperties`
       if(schema.patternProperties) {
         for(i in schema.patternProperties) {
-          if(!schema.patternProperties.hasOwnProperty(i)) continue;
+          if(!schema.patternProperties.hasOwnProperty(i)) { continue; }
 
           var regex = new RegExp(i);
 
           // Check which properties match
           for(j in value) {
-            if(!value.hasOwnProperty(j)) continue;
+            if(!value.hasOwnProperty(j)) { continue; }
             if(regex.test(j)) {
-              validated_properties[j] = true;
+              validatedProperties[j] = true;
               errors = errors.concat(this._validateSchema(schema.patternProperties[i],value[j],path+'.'+j));
             }
           }
         }
       }
 
-      // The no_additional_properties option currently doesn't work with extended schemas that use oneOf or anyOf
-      if(typeof schema.additionalProperties === "undefined" && this.jsoneditor.options.no_additional_properties && !schema.oneOf && !schema.anyOf) {
+      // The noAdditionalProperties option currently doesn't work with extended schemas that use oneOf or anyOf
+      if(typeof schema.additionalProperties === 'undefined' && this.jsoneditor.options.noAdditionalProperties && !schema.oneOf && !schema.anyOf) {
         schema.additionalProperties = false;
       }
 
       // `additionalProperties`
-      if(typeof schema.additionalProperties !== "undefined") {
+      if(typeof schema.additionalProperties !== 'undefined') {
         for(i in value) {
-          if(!value.hasOwnProperty(i)) continue;
-          if(!validated_properties[i]) {
+          if(!value.hasOwnProperty(i)) { continue; }
+          if(!validatedProperties[i]) {
             // No extra properties allowed
             if(!schema.additionalProperties) {
               errors.push({
                 path: path,
                 property: 'additionalProperties',
-                message: this.translate('error_additional_properties', [i])
+                message: this.translate('errorAdditionalProperties', [i])
               });
               break;
             }
@@ -1281,19 +1286,19 @@ JSONEditor.Validator = Class.extend({
       // `dependencies`
       if(schema.dependencies) {
         for(i in schema.dependencies) {
-          if(!schema.dependencies.hasOwnProperty(i)) continue;
+          if(!schema.dependencies.hasOwnProperty(i)) { continue; }
 
           // Doesn't need to meet the dependency
-          if(typeof value[i] === "undefined") continue;
+          if(typeof value[i] === 'undefined') { continue; }
 
           // Property dependency
           if(Array.isArray(schema.dependencies[i])) {
             for(j=0; j<schema.dependencies[i].length; j++) {
-              if(typeof value[schema.dependencies[i][j]] === "undefined") {
+              if(typeof value[schema.dependencies[i][j]] === 'undefined') {
                 errors.push({
                   path: path,
                   property: 'dependencies',
-                  message: this.translate('error_dependency', [schema.dependencies[i][j]])
+                  message: this.translate('errorDependency', [schema.dependencies[i][j]])
                 });
               }
             }
@@ -1307,8 +1312,8 @@ JSONEditor.Validator = Class.extend({
     }
 
     if (schema.links) {
-      for (var i = 0; i < schema.links.length; i++) {
-        if (schema.links[i].rel.toLowerCase() === "describedby") {
+      for (i = 0; i < schema.links.length; i++) {
+        if (schema.links[i].rel.toLowerCase() === 'describedby') {
           var href = schema.links[i].href;
           var data = this.jsoneditor.root.getValue();
           //var template = new UriTemplate(href); //preprocessURI(href));
@@ -1326,7 +1331,7 @@ JSONEditor.Validator = Class.extend({
     }
 
     // Custom type validation
-    $each(JSONEditor.defaults.custom_validators,function(i,validator) {
+    $each(JSONEditor.defaults.customValidators,function(i,validator) {
       errors = errors.concat(validator.call(self,schema,value,path));
     });
 
@@ -1334,15 +1339,15 @@ JSONEditor.Validator = Class.extend({
   },
   _checkType: function(type, value) {
     // Simple types
-    if(typeof type === "string") {
-      if(type==="string") return typeof value === "string";
-      else if(type==="number") return typeof value === "number";
-      else if(type==="integer") return typeof value === "number" && value === Math.floor(value);
-      else if(type==="boolean") return typeof value === "boolean";
-      else if(type==="array") return Array.isArray(value);
-      else if(type === "object") return value !== null && !(Array.isArray(value)) && typeof value === "object";
-      else if(type === "null") return value === null;
-      else return true;
+    if(typeof type === 'string') {
+      if(type==='string') { return typeof value === 'string'; }
+      else if(type==='number') { return typeof value === 'number'; }
+      else if(type==='integer') { return typeof value === 'number' && value === Math.floor(value); }
+      else if(type==='boolean') { return typeof value === 'boolean'; }
+      else if(type==='array') { return Array.isArray(value); }
+      else if(type === 'object') { return value !== null && !(Array.isArray(value)) && typeof value === 'object'; }
+      else if(type === 'null') { return value === null; }
+      else { return true; }
     }
     // Schema
     else {
@@ -1362,20 +1367,20 @@ JSONEditor.AbstractEditor = Class.extend({
     this.jsoneditor.notifyWatchers(this.path);
   },
   change: function() {
-    if(this.parent) this.parent.onChildEditorChange(this);
-    else this.jsoneditor.onChange();
+    if(this.parent) { this.parent.onChildEditorChange(this); }
+    else { this.jsoneditor.onChange(); }
   },
   onChange: function(bubble) {
     this.notify();
-    if(this.watch_listener) this.watch_listener();
-    if(bubble) this.change();
+    if(this.watchListener) { this.watchListener(); }
+    if(bubble) { this.change(); }
   },
   register: function() {
     this.jsoneditor.registerEditor(this);
     this.onChange();
   },
   unregister: function() {
-    if(!this.jsoneditor) return;
+    if(!this.jsoneditor) { return; }
     this.jsoneditor.unregisterEditor(this);
   },
   getNumColumns: function() {
@@ -1385,29 +1390,29 @@ JSONEditor.AbstractEditor = Class.extend({
     this.jsoneditor = options.jsoneditor;
     
     this.theme = this.jsoneditor.theme;
-    this.template_engine = this.jsoneditor.template;
+    this.templateEngine = this.jsoneditor.template;
     this.iconlib = this.jsoneditor.iconlib;
     
-    this.original_schema = options.schema;
-    this.schema = this.jsoneditor.expandSchema(this.original_schema);
+    this.originalSchema = options.schema;
+    this.schema = this.jsoneditor.expandSchema(this.originalSchema);
     
     this.options = $extend({}, (this.options || {}), (options.schema.options || {}), options);
     
-    if(!options.path && !this.schema.id) this.schema.id = 'root';
+    if(!options.path && !this.schema.id) { this.schema.id = 'root'; }
     this.path = options.path || 'root';
     this.formname = options.formname || this.path.replace(/\.([^.]+)/g,'[$1]');
-    if(this.jsoneditor.options.form_name_root) this.formname = this.formname.replace(/^root\[/,this.jsoneditor.options.form_name_root+'[');
+    if(this.jsoneditor.options.formNameRoot) { this.formname = this.formname.replace(/^root\[/,this.jsoneditor.options.formNameRoot+'['); }
     this.key = this.path.split('.').pop();
     this.parent = options.parent;
     
-    this.link_watchers = [];
+    this.linkWatchers = [];
     
-    if(options.container) this.setContainer(options.container);
+    if(options.container) { this.setContainer(options.container); }
   },
   setContainer: function(container) {
     this.container = container;
-    if(this.schema.id) this.container.setAttribute('data-schemaid',this.schema.id);
-    if(this.schema.type && typeof this.schema.type === "string") this.container.setAttribute('data-schematype',this.schema.type);
+    if(this.schema.id) { this.container.setAttribute('data-schemaid',this.schema.id); }
+    if(this.schema.type && typeof this.schema.type === 'string') { this.container.setAttribute('data-schematype',this.schema.type); }
     this.container.setAttribute('data-schemapath',this.path);
   },
   
@@ -1431,9 +1436,9 @@ JSONEditor.AbstractEditor = Class.extend({
     
     // Watched fields
     this.watched = {};
-    if(this.schema.vars) this.schema.watch = this.schema.vars;
-    this.watched_values = {};
-    this.watch_listener = function() {
+    if(this.schema.vars) { this.schema.watch = this.schema.vars; }
+    this.watchedValues = {};
+    this.watchListener = function() {
       if(self.refreshWatchedFieldValues()) {
         self.onWatchedFieldChange();
       }
@@ -1441,47 +1446,47 @@ JSONEditor.AbstractEditor = Class.extend({
     
     this.register();
     if(this.schema.hasOwnProperty('watch')) {
-      var path,path_parts,first,root,adjusted_path;
+      var path,pathParts,first,root,adjustedPath;
 
       for(var name in this.schema.watch) {
-        if(!this.schema.watch.hasOwnProperty(name)) continue;
+        if(!this.schema.watch.hasOwnProperty(name)) { continue; }
         path = this.schema.watch[name];
 
         if(Array.isArray(path)) {
-          path_parts = [path[0]].concat(path[1].split('.'));
+          pathParts = [path[0]].concat(path[1].split('.'));
         }
         else {
-          path_parts = path.split('.');
-          if(!self.theme.closest(self.container,'[data-schemaid="'+path_parts[0]+'"]')) path_parts.unshift('#');
+          pathParts = path.split('.');
+          if(!self.theme.closest(self.container,'[data-schemaid="'+pathParts[0]+'"]')) { pathParts.unshift('#'); }
         }
-        first = path_parts.shift();
+        first = pathParts.shift();
 
-        if(first === '#') first = self.jsoneditor.schema.id || 'root';
+        if(first === '#') { first = self.jsoneditor.schema.id || 'root'; }
 
         // Find the root node for this template variable
         root = self.theme.closest(self.container,'[data-schemaid="'+first+'"]');
-        if(!root) throw "Could not find ancestor node with id "+first;
+        if(!root) { throw 'Could not find ancestor node with id '+first; }
 
         // Keep track of the root node and path for use when rendering the template
-        adjusted_path = root.getAttribute('data-schemapath') + '.' + path_parts.join('.');
+        adjustedPath = root.getAttribute('data-schemapath') + '.' + pathParts.join('.');
         
-        self.jsoneditor.watch(adjusted_path,self.watch_listener);
+        self.jsoneditor.watch(adjustedPath,self.watchListener);
         
-        self.watched[name] = adjusted_path;
+        self.watched[name] = adjustedPath;
       }
     }
     
     // Dynamic header
     if(this.schema.headerTemplate) {
-      this.header_template = this.jsoneditor.compileTemplate(this.schema.headerTemplate, this.template_engine);
+      this.headerTemplate = this.jsoneditor.compileTemplate(this.schema.headerTemplate, this.templateEngine);
     }
   },
   
   addLinks: function() {
     // Add links
-    if(!this.no_link_holder) {
-      this.link_holder = this.theme.getLinksHolder();
-      this.container.appendChild(this.link_holder);
+    if(!this.noLinkHolder) {
+      this.linkHolder = this.theme.getLinksHolder();
+      this.container.appendChild(this.linkHolder);
       if(this.schema.links) {
         for(var i=0; i<this.schema.links.length; i++) {
           this.addLink(this.getLink(this.schema.links[i]));
@@ -1493,8 +1498,8 @@ JSONEditor.AbstractEditor = Class.extend({
   
   getButton: function(text, icon, title) {
     var btnClass = 'json-editor-btn-'+icon;
-    if(!this.iconlib) icon = null;
-    else icon = this.iconlib.getIcon(icon);
+    if(!this.iconlib) { icon = null; }
+    else { icon = this.iconlib.getIcon(icon); }
     
     if(!icon && title) {
       text = title;
@@ -1506,8 +1511,8 @@ JSONEditor.AbstractEditor = Class.extend({
     return btn;
   },
   setButtonText: function(button, text, icon, title) {
-    if(!this.iconlib) icon = null;
-    else icon = this.iconlib.getIcon(icon);
+    if(!this.iconlib) { icon = null; }
+    else { icon = this.iconlib.getIcon(icon); }
     
     if(!icon && title) {
       text = title;
@@ -1517,7 +1522,7 @@ JSONEditor.AbstractEditor = Class.extend({
     return this.theme.setButtonText(button, text, icon, title);
   },
   addLink: function(link) {
-    if(this.link_holder) this.link_holder.appendChild(link);
+    if(this.linkHolder) { this.linkHolder.appendChild(link); }
   },
   getLink: function(data) {
     var holder, link;
@@ -1527,7 +1532,7 @@ JSONEditor.AbstractEditor = Class.extend({
     var type = mime.split('/')[0];
     
     // Template to generate the link href
-    var href = this.jsoneditor.compileTemplate(data.href,this.template_engine);
+    var href = this.jsoneditor.compileTemplate(data.href,this.templateEngine);
     
     // Image links
     if(type === 'image') {
@@ -1539,7 +1544,7 @@ JSONEditor.AbstractEditor = Class.extend({
       this.theme.createImageLink(holder,link,image);
     
       // When a watched field changes, update the url  
-      this.link_watchers.push(function(vars) {
+      this.linkWatchers.push(function(vars) {
         var url = href(vars);
         link.setAttribute('href',url);
         link.setAttribute('title',data.rel || url);
@@ -1559,7 +1564,7 @@ JSONEditor.AbstractEditor = Class.extend({
       this.theme.createMediaLink(holder,link,media);
       
       // When a watched field changes, update the url  
-      this.link_watchers.push(function(vars) {
+      this.linkWatchers.push(function(vars) {
         var url = href(vars);
         link.setAttribute('href',url);
         link.textContent = data.rel || url;
@@ -1573,7 +1578,7 @@ JSONEditor.AbstractEditor = Class.extend({
       holder.textContent = data.rel;
       
       // When a watched field changes, update the url  
-      this.link_watchers.push(function(vars) {
+      this.linkWatchers.push(function(vars) {
         var url = href(vars);
         holder.setAttribute('href',url);
         holder.textContent = data.rel || url;
@@ -1583,7 +1588,7 @@ JSONEditor.AbstractEditor = Class.extend({
     return holder;
   },
   refreshWatchedFieldValues: function() {
-    if(!this.watched_values) return;
+    if(!this.watchedValues) { return; }
     var watched = {};
     var changed = false;
     var self = this;
@@ -1591,23 +1596,23 @@ JSONEditor.AbstractEditor = Class.extend({
     if(this.watched) {
       var val,editor;
       for(var name in this.watched) {
-        if(!this.watched.hasOwnProperty(name)) continue;
+        if(!this.watched.hasOwnProperty(name)) { continue; }
         editor = self.jsoneditor.getEditor(this.watched[name]);
         val = editor? editor.getValue() : null;
-        if(self.watched_values[name] !== val) changed = true;
+        if(self.watchedValues[name] !== val) { changed = true; }
         watched[name] = val;
       }
     }
     
     watched.self = this.getValue();
-    if(this.watched_values.self !== watched.self) changed = true;
+    if(this.watchedValues.self !== watched.self) { changed = true; }
     
-    this.watched_values = watched;
+    this.watchedValues = watched;
     
     return changed;
   },
   getWatchedFieldValues: function() {
-    return this.watched_values;
+    return this.watchedValues;
   },
   updateHeaderText: function() {
     if(this.header) {
@@ -1626,14 +1631,14 @@ JSONEditor.AbstractEditor = Class.extend({
       }
     }
   },
-  getHeaderText: function(title_only) {
-    if(this.header_text) return this.header_text;
-    else if(title_only) return this.schema.title;
-    else return this.getTitle();
+  getHeaderText: function(titleOnly) {
+    if(this.headerText) { return this.headerText; }
+    else if(titleOnly) { return this.schema.title; }
+    else { return this.getTitle(); }
   },
   onWatchedFieldChange: function() {
     var vars;
-    if(this.header_template) {      
+    if(this.headerTemplate) {
       vars = $extend(this.getWatchedFieldValues(),{
         key: this.key,
         i: this.key,
@@ -1641,19 +1646,19 @@ JSONEditor.AbstractEditor = Class.extend({
         i1: (this.key*1+1),
         title: this.getTitle()
       });
-      var header_text = this.header_template(vars);
+      var headerText = this.headerTemplate(vars);
       
-      if(header_text !== this.header_text) {
-        this.header_text = header_text;
+      if(headerText !== this.headerText) {
+        this.headerText = headerText;
         this.updateHeaderText();
         this.notify();
         //this.fireChangeHeaderEvent();
       }
     }
-    if(this.link_watchers.length) {
+    if(this.linkWatchers.length) {
       vars = this.getWatchedFieldValues();
-      for(var i=0; i<this.link_watchers.length; i++) {
-        this.link_watchers[i](vars);
+      for(var i=0; i<this.linkWatchers.length; i++) {
+        this.linkWatchers[i](vars);
       }
     }
   },
@@ -1672,16 +1677,16 @@ JSONEditor.AbstractEditor = Class.extend({
   destroy: function() {
     var self = this;
     this.unregister(this);
-    $each(this.watched,function(name,adjusted_path) {
-      self.jsoneditor.unwatch(adjusted_path,self.watch_listener);
+    $each(this.watched,function(name,adjustedPath) {
+      self.jsoneditor.unwatch(adjustedPath,self.watchListener);
     });
     this.watched = null;
-    this.watched_values = null;
-    this.watch_listener = null;
-    this.header_text = null;
-    this.header_template = null;
+    this.watchedValues = null;
+    this.watchListener = null;
+    this.headerText = null;
+    this.headerTemplate = null;
     this.value = null;
-    if(this.container && this.container.parentNode) this.container.parentNode.removeChild(this.container);
+    if(this.container && this.container.parentNode) { this.container.parentNode.removeChild(this.container); }
     this.container = null;
     this.jsoneditor = null;
     this.schema = null;
@@ -1690,21 +1695,21 @@ JSONEditor.AbstractEditor = Class.extend({
     this.parent = null;
   },
   getDefault: function() {
-    if(this.schema["default"]) return this.schema["default"];
-    if(this.schema["enum"]) return this.schema["enum"][0];
+    if(this.schema['default']) { return this.schema['default']; }
+    if(this.schema['enum']) { return this.schema['enum'][0]; }
     
     var type = this.schema.type || this.schema.oneOf;
-    if(type && Array.isArray(type)) type = type[0];
-    if(type && typeof type === "object") type = type.type;
-    if(type && Array.isArray(type)) type = type[0];
+    if(type && Array.isArray(type)) { type = type[0]; }
+    if(type && typeof type === 'object') { type = type.type; }
+    if(type && Array.isArray(type)) { type = type[0]; }
     
-    if(typeof type === "string") {
-      if(type === "number") return 0.0;
-      if(type === "boolean") return false;
-      if(type === "integer") return 0;
-      if(type === "string") return "";
-      if(type === "object") return {};
-      if(type === "array") return [];
+    if(typeof type === 'string') {
+      if(type === 'number') { return 0.0; }
+      if(type === 'boolean') { return false; }
+      if(type === 'integer') { return 0; }
+      if(type === 'string') { return ''; }
+      if(type === 'object') { return {}; }
+      if(type === 'array') { return []; }
     }
     
     return null;
@@ -1722,10 +1727,10 @@ JSONEditor.AbstractEditor = Class.extend({
     return !this.disabled;
   },
   isRequired: function() {
-    if(typeof this.schema.required === "boolean") return this.schema.required;
-    else if(this.parent && this.parent.schema && Array.isArray(this.parent.schema.required)) return this.parent.schema.required.indexOf(this.key) > -1;
-    else if(this.jsoneditor.options.required_by_default) return true;
-    else return false;
+    if(typeof this.schema.required === 'boolean') { return this.schema.required; }
+    else if(this.parent && this.parent.schema && Array.isArray(this.parent.schema.required)) { return this.parent.schema.required.indexOf(this.key) > -1; }
+    else if(this.jsoneditor.options.requiredByDefault) { return true; }
+    else { return false; }
   },  
   getDisplayText: function(arr) {
     var disp = [];
@@ -1757,36 +1762,36 @@ JSONEditor.AbstractEditor = Class.extend({
       var name;
       
       // If it's a simple string
-      if(typeof el === "string") name = el;
+      if(typeof el === 'string') { name = el; }
       // Object
-      else if(el.title && used[el.title]<=1) name = el.title;
-      else if(el.format && used[el.format]<=1) name = el.format;
-      else if(el.type && used[el.type]<=1) name = el.type;
-      else if(el.description && used[el.description]<=1) name = el.descripton;
-      else if(el.title) name = el.title;
-      else if(el.format) name = el.format;
-      else if(el.type) name = el.type;
-      else if(el.description) name = el.description;
-      else if(JSON.stringify(el).length < 50) name = JSON.stringify(el);
-      else name = "type";
+      else if(el.title && used[el.title]<=1) { name = el.title; }
+      else if(el.format && used[el.format]<=1) { name = el.format; }
+      else if(el.type && used[el.type]<=1) { name = el.type; }
+      else if(el.description && used[el.description]<=1) { name = el.descripton; }
+      else if(el.title) { name = el.title; }
+      else if(el.format) { name = el.format; }
+      else if(el.type) { name = el.type; }
+      else if(el.description) { name = el.description; }
+      else if(JSON.stringify(el).length < 50) { name = JSON.stringify(el); }
+      else { name = 'type'; }
       
       disp.push(name);
     });
     
-    // Replace identical display text with "text 1", "text 2", etc.
+    // Replace identical display text with 'text 1', 'text 2', etc.
     var inc = {};
     $each(disp,function(i,name) {
       inc[name] = inc[name] || 0;
       inc[name]++;
       
-      if(used[name] > 1) disp[i] = name + " " + inc[name];
+      if(used[name] > 1) { disp[i] = name + ' ' + inc[name]; }
     });
     
     return disp;
   },
   getOption: function(key) {
     try {
-      throw "getOption is deprecated";
+      throw 'getOption is deprecated';
     }
     catch(e) {
       window.console.error(e);
@@ -1799,7 +1804,7 @@ JSONEditor.AbstractEditor = Class.extend({
   }
 });
 
-JSONEditor.defaults.editors["null"] = JSONEditor.AbstractEditor.extend({
+JSONEditor.defaults.editors['null'] = JSONEditor.AbstractEditor.extend({
   getValue: function() {
     return null;
   },
@@ -1814,26 +1819,26 @@ JSONEditor.defaults.editors["null"] = JSONEditor.AbstractEditor.extend({
 JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   register: function() {
     this._super();
-    if(!this.input) return;
+    if(!this.input) { return; }
     this.input.setAttribute('name',this.formname);
   },
   unregister: function() {
     this._super();
-    if(!this.input) return;
+    if(!this.input) { return; }
     this.input.removeAttribute('name');
   },
-  setValue: function(value,initial,from_template) {
+  setValue: function(value,initial,fromTemplate) {
     var self = this;
     
-    if(this.template && !from_template) {
+    if(this.template && !fromTemplate) {
       return;
     }
     
-    if(value === null || typeof value === 'undefined') value = "";
-    else if(typeof value === "object") value = JSON.stringify(value);
-    else if(typeof value !== "string") value = ""+value;
+    if(value === null || typeof value === 'undefined') { value = ''; }
+    else if(typeof value === 'object') { value = JSON.stringify(value); }
+    else if(typeof value !== 'string') { value = ''+value; }
     
-    if(value === this.serialized) return;
+    if(value === this.serialized) { return; }
 
     // Sanitize value before setting it
     var sanitized = this.sanitize(value);
@@ -1845,24 +1850,24 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     this.input.value = sanitized;
     
     // If using SCEditor, update the WYSIWYG
-    if(this.sceditor_instance) {
-      this.sceditor_instance.val(sanitized);
+    if(this.sceditorInstance) {
+      this.sceditorInstance.val(sanitized);
     }
     else if(this.epiceditor) {
       this.epiceditor.importFile(null,sanitized);
     }
-    else if(this.ace_editor) {
-      this.ace_editor.setValue(sanitized);
+    else if(this.aceEditor) {
+      this.aceEditor.setValue(sanitized);
     }
     
-    var changed = from_template || this.getValue() !== value;
+    var changed = fromTemplate || this.getValue() !== value;
     
     this.refreshValue();
     
-    if(initial) this.is_dirty = false;
-    else if(this.jsoneditor.options.show_errors === "change") this.is_dirty = true;
+    if(initial) { this.isDirty = false; }
+    else if(this.jsoneditor.options.showErrors === 'change') { this.isDirty = true; }
     
-    if(this.adjust_height) this.adjust_height(this.input);
+    if(this.adjustHeight) { this.adjustHeight(this.input); }
 
     // Bubble this setValue to parents if the value changed
     this.onChange(changed);
@@ -1871,23 +1876,23 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     var min = Math.ceil(Math.max(this.getTitle().length,this.schema.maxLength||0,this.schema.minLength||0)/5);
     var num;
     
-    if(this.input_type === 'textarea') num = 6;
-    else if(['text','email'].indexOf(this.input_type) >= 0) num = 4;
-    else num = 2;
+    if(this.inputType === 'textarea') { num = 6; }
+    else if(['text','email'].indexOf(this.inputType) >= 0) { num = 4; }
+    else { num = 2; }
     
     return Math.min(12,Math.max(min,num));
   },
   build: function() {
     var self = this, i;
-    if(!this.options.compact) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
-    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
+    if(!this.options.compact) { this.header = this.label = this.theme.getFormInputLabel(this.getTitle()); }
+    if(this.schema.description) { this.description = this.theme.getFormInputDescription(this.schema.description); }
 
     this.format = this.schema.format;
     if(!this.format && this.schema.media && this.schema.media.type) {
       this.format = this.schema.media.type.replace(/(^(application|text)\/(x-)?(script\.)?)|(-source$)/g,'');
     }
-    if(!this.format && this.options.default_format) {
-      this.format = this.options.default_format;
+    if(!this.format && this.options.defaultFormat) {
+      this.format = this.options.defaultFormat;
     }
     if(this.options.format) {
       this.format = this.options.format;
@@ -1897,18 +1902,18 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     if(this.format) {
       // Text Area
       if(this.format === 'textarea') {
-        this.input_type = 'textarea';
+        this.inputType = 'textarea';
         this.input = this.theme.getTextareaInput();
       }
       // Range Input
       else if(this.format === 'range') {
-        this.input_type = 'range';
+        this.inputType = 'range';
         var min = this.schema.minimum || 0;
         var max = this.schema.maximum || Math.max(100,min+1);
         var step = 1;
         if(this.schema.multipleOf) {
-          if(min%this.schema.multipleOf) min = Math.ceil(min/this.schema.multipleOf)*this.schema.multipleOf;
-          if(max%this.schema.multipleOf) max = Math.floor(max/this.schema.multipleOf)*this.schema.multipleOf;
+          if(min%this.schema.multipleOf) { min = Math.ceil(min/this.schema.multipleOf)*this.schema.multipleOf; }
+          if(max%this.schema.multipleOf) { max = Math.floor(max/this.schema.multipleOf)*this.schema.multipleOf; }
           step = this.schema.multipleOf;
         }
 
@@ -1967,42 +1972,42 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
           'yaml'
         ].indexOf(this.format) >= 0
       ) {
-        this.input_type = this.format;
-        this.source_code = true;
+        this.inputType = this.format;
+        this.sourceCode = true;
         
         this.input = this.theme.getTextareaInput();
       }
       // HTML5 Input type
       else {
-        this.input_type = this.format;
-        this.input = this.theme.getFormInputField(this.input_type);
+        this.inputType = this.format;
+        this.input = this.theme.getFormInputField(this.inputType);
       }
     }
     // Normal text input
     else {
-      this.input_type = 'text';
-      this.input = this.theme.getFormInputField(this.input_type);
+      this.inputType = 'text';
+      this.input = this.theme.getFormInputField(this.inputType);
     }
     
     // minLength, maxLength, and pattern
-    if(typeof this.schema.maxLength !== "undefined") this.input.setAttribute('maxlength',this.schema.maxLength);
-    if(typeof this.schema.pattern !== "undefined") this.input.setAttribute('pattern',this.schema.pattern);
-    else if(typeof this.schema.minLength !== "undefined") this.input.setAttribute('pattern','.{'+this.schema.minLength+',}');
+    if(typeof this.schema.maxLength !== 'undefined') { this.input.setAttribute('maxlength',this.schema.maxLength); }
+    if(typeof this.schema.pattern !== 'undefined') { this.input.setAttribute('pattern',this.schema.pattern); }
+    else if(typeof this.schema.minLength !== 'undefined') { this.input.setAttribute('pattern','.{'+this.schema.minLength+',}'); }
 
     if(this.options.compact) {
       this.container.className += ' compact';
     }
     else {
-      if(this.options.input_width) this.input.style.width = this.options.input_width;
+      if(this.options.inputWidth) { this.input.style.width = this.options.inputWidth; }
     }
 
     if(this.schema.readOnly || this.schema.readonly || this.schema.template) {
-      this.always_disabled = true;
+      this.alwaysDisabled = true;
       this.input.disabled = true;
     }
 
     this.input
-      .addEventListener('change',function(e) {        
+      .addEventListener('change',function(e) {
         e.preventDefault();
         e.stopPropagation();
         
@@ -2020,22 +2025,22 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
           this.value = sanitized;
         }
         
-        self.is_dirty = true;
+        self.isDirty = true;
 
         self.refreshValue();
         self.onChange(true);
       });
       
-    if(this.options.input_height) this.input.style.height = this.options.input_height;
-    if(this.options.expand_height) {
-      this.adjust_height = function(el) {
-        if(!el) return;
+    if(this.options.inputHeight) { this.input.style.height = this.options.inputHeight; }
+    if(this.options.expandHeight) {
+      this.adjustHeight = function(el) {
+        if(!el) { return; }
         var i, ch=el.offsetHeight;
         // Input too short
         if(el.offsetHeight < el.scrollHeight) {
           i=0;
           while(el.offsetHeight < el.scrollHeight+3) {
-            if(i>100) break;
+            if(i>100) { break; }
             i++;
             ch++;
             el.style.height = ch+'px';
@@ -2044,7 +2049,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
         else {
           i=0;
           while(el.offsetHeight >= el.scrollHeight+3) {
-            if(i>100) break;
+            if(i>100) { break; }
             i++;
             ch--;
             el.style.height = ch+'px';
@@ -2054,15 +2059,15 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
       };
       
       this.input.addEventListener('keyup',function(e) {
-        self.adjust_height(this);
+        self.adjustHeight(this);
       });
       this.input.addEventListener('change',function(e) {
-        self.adjust_height(this);
+        self.adjustHeight(this);
       });
-      this.adjust_height();
+      this.adjustHeight();
     }
 
-    if(this.format) this.input.setAttribute('data-schemaformat',this.format);
+    if(this.format) { this.input.setAttribute('data-schemaformat',this.format); }
 
     this.control = this.theme.getFormControl(this.label, this.input, this.description);
     this.container.appendChild(this.control);
@@ -2070,15 +2075,15 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     // Any special formatting that needs to happen after the input is added to the dom
     window.requestAnimationFrame(function() {
       // Skip in case the input is only a temporary editor,
-      // otherwise, in the case of an ace_editor creation,
+      // otherwise, in the case of an aceEditor creation,
       // it will generate an error trying to append it to the missing parentNode
-      if(self.input.parentNode) self.afterInputReady();
-      if(self.adjust_height) self.adjust_height(self.input);
+      if(self.input.parentNode) { self.afterInputReady(); }
+      if(self.adjustHeight) { self.adjustHeight(self.input); }
     });
 
     // Compile and store the template
     if(this.schema.template) {
-      this.template = this.jsoneditor.compileTemplate(this.schema.template, this.template_engine);
+      this.template = this.jsoneditor.compileTemplate(this.schema.template, this.templateEngine);
       this.refreshValue();
     }
     else {
@@ -2086,7 +2091,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     }
   },
   enable: function() {
-    if(!this.always_disabled) {
+    if(!this.alwaysDisabled) {
       this.input.disabled = false;
       // TODO: WYSIWYG and Markdown editors
     }
@@ -2101,43 +2106,43 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     var self = this, options;
     
     // Code editor
-    if(this.source_code) {      
+    if(this.sourceCode) {
       // WYSIWYG html and bbcode editor
       if(this.options.wysiwyg && 
-        ['html','bbcode'].indexOf(this.input_type) >= 0 && 
+        ['html','bbcode'].indexOf(this.inputType) >= 0 && 
         window.jQuery && window.jQuery.fn && window.jQuery.fn.sceditor
       ) {
         options = $extend({},{
-          plugins: self.input_type==='html'? 'xhtml' : 'bbcode',
+          plugins: self.inputType==='html'? 'xhtml' : 'bbcode',
           emoticonsEnabled: false,
           width: '100%',
           height: 300
-        },JSONEditor.plugins.sceditor,self.options.sceditor_options||{});
+        },JSONEditor.plugins.sceditor,self.options.sceditorOptions||{});
         
         window.jQuery(self.input).sceditor(options);
         
-        self.sceditor_instance = window.jQuery(self.input).sceditor('instance');
+        self.sceditorInstance = window.jQuery(self.input).sceditor('instance');
         
-        self.sceditor_instance.blur(function() {
+        self.sceditorInstance.blur(function() {
           // Get editor's value
-          var val = window.jQuery("<div>"+self.sceditor_instance.val()+"</div>");
+          var val = window.jQuery('<div>'+self.sceditorInstance.val()+'</div>');
           // Remove sceditor spans/divs
           window.jQuery('#sceditor-start-marker,#sceditor-end-marker,.sceditor-nlf',val).remove();
           // Set the value and update
           self.input.value = val.html();
           self.value = self.input.value;
-          self.is_dirty = true;
+          self.isDirty = true;
           self.onChange(true);
         });
       }
       // EpicEditor for markdown (if it's loaded)
-      else if (this.input_type === 'markdown' && window.EpicEditor) {
-        this.epiceditor_container = document.createElement('div');
-        this.input.parentNode.insertBefore(this.epiceditor_container,this.input);
+      else if (this.inputType === 'markdown' && window.EpicEditor) {
+        this.epiceditorContainer = document.createElement('div');
+        this.input.parentNode.insertBefore(this.epiceditorContainer,this.input);
         this.input.style.display = 'none';
         
         options = $extend({},JSONEditor.plugins.epiceditor,{
-          container: this.epiceditor_container,
+          container: this.epiceditorContainer,
           clientSideStorage: false
         });
         
@@ -2149,40 +2154,40 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
           var val = self.epiceditor.exportFile();
           self.input.value = val;
           self.value = val;
-          self.is_dirty = true;
+          self.isDirty = true;
           self.onChange(true);
         });
       }
       // ACE editor for everything else
       else if(window.ace) {
-        var mode = this.input_type;
+        var mode = this.inputType;
         // aliases for c/cpp
         if(mode === 'cpp' || mode === 'c++' || mode === 'c') {
-          mode = 'c_cpp';
+          mode = 'cCpp';
         }
         
-        this.ace_container = document.createElement('div');
-        this.ace_container.style.width = '100%';
-        this.ace_container.style.position = 'relative';
-        this.ace_container.style.height = '400px';
-        this.input.parentNode.insertBefore(this.ace_container,this.input);
+        this.aceContainer = document.createElement('div');
+        this.aceContainer.style.width = '100%';
+        this.aceContainer.style.position = 'relative';
+        this.aceContainer.style.height = '400px';
+        this.input.parentNode.insertBefore(this.aceContainer,this.input);
         this.input.style.display = 'none';
-        this.ace_editor = window.ace.edit(this.ace_container);
+        this.aceEditor = window.ace.edit(this.aceContainer);
         
-        this.ace_editor.setValue(this.getValue());
+        this.aceEditor.setValue(this.getValue());
         
         // The theme
-        if(JSONEditor.plugins.ace.theme) this.ace_editor.setTheme('ace/theme/'+JSONEditor.plugins.ace.theme);
+        if(JSONEditor.plugins.ace.theme) { this.aceEditor.setTheme('ace/theme/'+JSONEditor.plugins.ace.theme); }
         // The mode
-        mode = window.ace.require("ace/mode/"+mode);
-        if(mode) this.ace_editor.getSession().setMode(new mode.Mode());
+        mode = window.ace.require('ace/mode/'+mode);
+        if(mode) { this.aceEditor.getSession().setMode(new mode.Mode()); }
         
         // Listen for changes
-        this.ace_editor.on('change',function() {
-          var val = self.ace_editor.getValue();
+        this.aceEditor.on('change',function() {
+          var val = self.aceEditor.getValue();
           self.input.value = val;
           self.refreshValue();
-          self.is_dirty = true;
+          self.isDirty = true;
           self.onChange(true);
         });
       }
@@ -2192,26 +2197,26 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   },
   refreshValue: function() {
     this.value = this.input.value;
-    if(typeof this.value !== "string") this.value = '';
+    if(typeof this.value !== 'string') { this.value = ''; }
     this.serialized = this.value;
   },
   destroy: function() {
     // If using SCEditor, destroy the editor instance
-    if(this.sceditor_instance) {
-      this.sceditor_instance.destroy();
+    if(this.sceditorInstance) {
+      this.sceditorInstance.destroy();
     }
     else if(this.epiceditor) {
       this.epiceditor.unload();
     }
-    else if(this.ace_editor) {
-      this.ace_editor.destroy();
+    else if(this.aceEditor) {
+      this.aceEditor.destroy();
     }
     
     
     this.template = null;
-    if(this.input && this.input.parentNode) this.input.parentNode.removeChild(this.input);
-    if(this.label && this.label.parentNode) this.label.parentNode.removeChild(this.label);
-    if(this.description && this.description.parentNode) this.description.parentNode.removeChild(this.description);
+    if(this.input && this.input.parentNode) { this.input.parentNode.removeChild(this.input); }
+    if(this.label && this.label.parentNode) { this.label.parentNode.removeChild(this.label); }
+    if(this.description && this.description.parentNode) { this.description.parentNode.removeChild(this.description); }
 
     this._super();
   },
@@ -2224,7 +2229,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   /**
    * Re-calculates the value if needed
    */
-  onWatchedFieldChange: function() {    
+  onWatchedFieldChange: function() {
     var self = this, vars, j;
     
     // If this editor needs to be rendered by a macro template
@@ -2238,10 +2243,10 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   showValidationErrors: function(errors) {
     var self = this;
     
-    if(this.jsoneditor.options.show_errors === "always") {}
-    else if(!this.is_dirty && this.previous_error_setting===this.jsoneditor.options.show_errors) return;
+    if(this.jsoneditor.options.showErrors === 'always') {}
+    else if(!this.isDirty && this.previousErrorSetting===this.jsoneditor.options.showErrors) { return; }
     
-    this.previous_error_setting = this.jsoneditor.options.show_errors;
+    this.previousErrorSetting = this.jsoneditor.options.showErrors;
 
     var messages = [];
     $each(errors,function(i,error) {
@@ -2261,7 +2266,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
 
 JSONEditor.defaults.editors.number = JSONEditor.defaults.editors.string.extend({
   sanitize: function(value) {
-    return (value+"").replace(/[^0-9\.\-eE]/g,'');
+    return (value+'').replace(/[^0-9\.\-eE]/g,'');
   },
   getNumColumns: function() {
     return 2;
@@ -2273,7 +2278,7 @@ JSONEditor.defaults.editors.number = JSONEditor.defaults.editors.string.extend({
 
 JSONEditor.defaults.editors.integer = JSONEditor.defaults.editors.number.extend({
   sanitize: function(value) {
-    value = value + "";
+    value = value + '';
     return value.replace(/[^0-9\-]/g,'');
   },
   getNumColumns: function() {
@@ -2283,7 +2288,7 @@ JSONEditor.defaults.editors.integer = JSONEditor.defaults.editors.number.extend(
 
 JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
   getDefault: function() {
-    return $extend({},this.schema["default"] || {});
+    return $extend({},this.schema['default'] || {});
   },
   getChildEditors: function() {
     return this.editors;
@@ -2292,7 +2297,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this._super();
     if(this.editors) {
       for(var i in this.editors) {
-        if(!this.editors.hasOwnProperty(i)) continue;
+        if(!this.editors.hasOwnProperty(i)) { continue; }
         this.editors[i].register();
       }
     }
@@ -2301,7 +2306,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this._super();
     if(this.editors) {
       for(var i in this.editors) {
-        if(!this.editors.hasOwnProperty(i)) continue;
+        if(!this.editors.hasOwnProperty(i)) { continue; }
         this.editors[i].unregister();
       }
     }
@@ -2310,26 +2315,26 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     return Math.max(Math.min(12,this.maxwidth),3);
   },
   enable: function() {
-    if(this.editjson_button) this.editjson_button.disabled = false;
-    if(this.addproperty_button) this.addproperty_button.disabled = false;
+    if(this.editjsonButton) { this.editjsonButton.disabled = false; }
+    if(this.addpropertyButton) { this.addpropertyButton.disabled = false; }
     
     this._super();
     if(this.editors) {
       for(var i in this.editors) {
-        if(!this.editors.hasOwnProperty(i)) continue;
+        if(!this.editors.hasOwnProperty(i)) { continue; }
         this.editors[i].enable();
       }
     }
   },
   disable: function() {
-    if(this.editjson_button) this.editjson_button.disabled = true;
-    if(this.addproperty_button) this.addproperty_button.disabled = true;
+    if(this.editjsonButton) { this.editjsonButton.disabled = true; }
+    if(this.addpropertyButton) { this.addpropertyButton.disabled = true; }
     this.hideEditJSON();
     
     this._super();
     if(this.editors) {
       for(var i in this.editors) {
-        if(!this.editors.hasOwnProperty(i)) continue;
+        if(!this.editors.hasOwnProperty(i)) { continue; }
         this.editors[i].disable();
       }
     }
@@ -2337,15 +2342,15 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
   layoutEditors: function() {
     var self = this, i, j;
     
-    if(!this.row_container) return;
+    if(!this.rowContainer) { return; }
 
     // Sort editors by propertyOrder
-    this.property_order = Object.keys(this.editors);
-    this.property_order = this.property_order.sort(function(a,b) {
+    this.propertyOrder = Object.keys(this.editors);
+    this.propertyOrder = this.propertyOrder.sort(function(a,b) {
       var ordera = self.editors[a].schema.propertyOrder;
       var orderb = self.editors[b].schema.propertyOrder;
-      if(typeof ordera !== "number") ordera = 1000;
-      if(typeof orderb !== "number") orderb = 1000;
+      if(typeof ordera !== 'number') { ordera = 1000; }
+      if(typeof orderb !== 'number') { orderb = 1000; }
 
       return ordera - orderb;
     });
@@ -2354,11 +2359,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     
     if(this.format === 'grid') {
       var rows = [];
-      $each(this.property_order, function(j,key) {
+      $each(this.propertyOrder, function(j,key) {
         var editor = self.editors[key];
-        if(editor.property_removed) return;
+        if(editor.propertyRemoved) { return; }
         var found = false;
-        var width = editor.options.hidden? 0 : (editor.options.grid_columns || editor.getNumColumns());
+        var width = editor.options.hidden? 0 : (editor.options.gridColumns || editor.getNumColumns());
         var height = editor.options.hidden? 0 : editor.container.offsetHeight;
         // See if the editor will fit in any of the existing rows first
         for(var i=0; i<rows.length; i++) {
@@ -2401,21 +2406,21 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       for(i=0; i<rows.length; i++) {
         if(rows[i].width < 12) {
           var biggest = false;
-          var new_width = 0;
+          var newWidth = 0;
           for(j=0; j<rows[i].editors.length; j++) {
-            if(biggest === false) biggest = j;
-            else if(rows[i].editors[j].width > rows[i].editors[biggest].width) biggest = j;
+            if(biggest === false) { biggest = j; }
+            else if(rows[i].editors[j].width > rows[i].editors[biggest].width) { biggest = j; }
             rows[i].editors[j].width *= 12/rows[i].width;
             rows[i].editors[j].width = Math.floor(rows[i].editors[j].width);
-            new_width += rows[i].editors[j].width;
+            newWidth += rows[i].editors[j].width;
           }
-          if(new_width < 12) rows[i].editors[biggest].width += 12-new_width;
+          if(newWidth < 12) { rows[i].editors[biggest].width += 12-newWidth; }
           rows[i].width = 12;
         }
       }
       
       // layout hasn't changed
-      if(this.layout === JSON.stringify(rows)) return false;
+      if(this.layout === JSON.stringify(rows)) { return false; }
       this.layout = JSON.stringify(rows);
       
       // Layout the form
@@ -2427,8 +2432,8 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
           var key = rows[i].editors[j].key;
           var editor = this.editors[key];
           
-          if(editor.options.hidden) editor.container.style.display = 'none';
-          else this.theme.setGridColumnSize(editor.container,rows[i].editors[j].width);
+          if(editor.options.hidden) { editor.container.style.display = 'none'; }
+          else { this.theme.setGridColumnSize(editor.container,rows[i].editors[j].width); }
           row.appendChild(editor.container);
         }
       }
@@ -2436,19 +2441,19 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     // Normal layout
     else {
       container = document.createElement('div');
-      $each(this.property_order, function(i,key) {
+      $each(this.propertyOrder, function(i,key) {
         var editor = self.editors[key];
-        if(editor.property_removed) return;
+        if(editor.propertyRemoved) { return; }
         var row = self.theme.getGridRow();
         container.appendChild(row);
         
-        if(editor.options.hidden) editor.container.style.display = 'none';
-        else self.theme.setGridColumnSize(editor.container,12);
+        if(editor.options.hidden) { editor.container.style.display = 'none'; }
+        else { self.theme.setGridColumnSize(editor.container,12); }
         row.appendChild(editor.container);
       });
     }
-    this.row_container.innerHTML = '';
-    this.row_container.appendChild(container);
+    this.rowContainer.innerHTML = '';
+    this.rowContainer.appendChild(container);
   },
   getPropertySchema: function(key) {
     // Schema declared directly in properties
@@ -2459,7 +2464,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     // Any matching patternProperties should be merged in
     if(this.schema.patternProperties) {
       for(var i in this.schema.patternProperties) {
-        if(!this.schema.patternProperties.hasOwnProperty(i)) continue;
+        if(!this.schema.patternProperties.hasOwnProperty(i)) { continue; }
         var regex = new RegExp(i);
         if(regex.test(key)) {
           schema.allOf = schema.allOf || [];
@@ -2470,7 +2475,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     }
     
     // Hasn't matched other rules, use additionalProperties schema
-    if(!matched && this.schema.additionalProperties && typeof this.schema.additionalProperties === "object") {
+    if(!matched && this.schema.additionalProperties && typeof this.schema.additionalProperties === 'object') {
       schema = $extend({},this.schema.additionalProperties);
     }
     
@@ -2480,10 +2485,10 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this._super();
 
     this.editors = {};
-    this.cached_editors = {};
+    this.cachedEditors = {};
     var self = this;
 
-    this.format = this.options.layout || this.options.object_layout || this.schema.format || this.jsoneditor.options.object_layout || 'normal';
+    this.format = this.options.layout || this.options.objectLayout || this.schema.format || this.jsoneditor.options.objectLayout || 'normal';
 
     this.schema.properties = this.schema.properties || {};
 
@@ -2491,7 +2496,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this.maxwidth = 0;
 
     // If the object should be rendered as a table row
-    if(this.options.table_row) {
+    if(this.options.tableRow) {
       $each(this.schema.properties, function(key,schema) {
         var editor = self.jsoneditor.getEditorClass(schema);
         self.editors[key] = self.jsoneditor.createEditor(editor,{
@@ -2504,17 +2509,17 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         });
         self.editors[key].preBuild();
 
-        var width = self.editors[key].options.hidden? 0 : (self.editors[key].options.grid_columns || self.editors[key].getNumColumns());
+        var width = self.editors[key].options.hidden? 0 : (self.editors[key].options.gridColumns || self.editors[key].getNumColumns());
 
         self.minwidth += width;
         self.maxwidth += width;
       });
-      this.no_link_holder = true;
+      this.noLinkHolder = true;
     }
     // If the object should be rendered as a table
     else if(this.options.table) {
       // TODO: table display format
-      throw "Not supported yet";
+      throw 'Not supported yet';
     }
     // If the object should be rendered as a div
     else {
@@ -2527,19 +2532,19 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         self.addObjectProperty(key, true);
 
         if(self.editors[key]) {
-          self.minwidth = Math.max(self.minwidth,(self.editors[key].options.grid_columns || self.editors[key].getNumColumns()));
-          self.maxwidth += (self.editors[key].options.grid_columns || self.editors[key].getNumColumns());
+          self.minwidth = Math.max(self.minwidth,(self.editors[key].options.gridColumns || self.editors[key].getNumColumns()));
+          self.maxwidth += (self.editors[key].options.gridColumns || self.editors[key].getNumColumns());
         }
       });
     }
     
     // Sort editors by propertyOrder
-    this.property_order = Object.keys(this.editors);
-    this.property_order = this.property_order.sort(function(a,b) {
+    this.propertyOrder = Object.keys(this.editors);
+    this.propertyOrder = this.propertyOrder.sort(function(a,b) {
       var ordera = self.editors[a].schema.propertyOrder;
       var orderb = self.editors[b].schema.propertyOrder;
-      if(typeof ordera !== "number") ordera = 1000;
-      if(typeof orderb !== "number") orderb = 1000;
+      if(typeof ordera !== 'number') { ordera = 1000; }
+      if(typeof orderb !== 'number') { orderb = 1000; }
 
       return ordera - orderb;
     });
@@ -2548,11 +2553,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     var self = this;
 
     // If the object should be rendered as a table row
-    if(this.options.table_row) {
-      this.editor_holder = this.container;
+    if(this.options.tableRow) {
+      this.editorHolder = this.container;
       $each(this.editors, function(key,editor) {
         var holder = self.theme.getTableCell();
-        self.editor_holder.appendChild(holder);
+        self.editorHolder.appendChild(holder);
 
         editor.setContainer(holder);
         editor.build();
@@ -2561,15 +2566,15 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         if(self.editors[key].options.hidden) {
           holder.style.display = 'none';
         }
-        if(self.editors[key].options.input_width) {
-          holder.style.width = self.editors[key].options.input_width;
+        if(self.editors[key].options.inputWidth) {
+          holder.style.width = self.editors[key].options.inputWidth;
         }
       });
     }
     // If the object should be rendered as a table
     else if(this.options.table) {
       // TODO: table display format
-      throw "Not supported yet";
+      throw 'Not supported yet';
     }
     // If the object should be rendered as a div
     else {
@@ -2580,65 +2585,65 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       this.container.style.position = 'relative';
       
       // Edit JSON modal
-      this.editjson_holder = this.theme.getModal();
-      this.editjson_textarea = this.theme.getTextareaInput();
-      this.editjson_textarea.style.height = '170px';
-      this.editjson_textarea.style.width = '300px';
-      this.editjson_textarea.style.display = 'block';
-      this.editjson_save = this.getButton('Save','save','Save');
-      this.editjson_save.addEventListener('click',function(e) {
+      this.editjsonHolder = this.theme.getModal();
+      this.editjsonTextarea = this.theme.getTextareaInput();
+      this.editjsonTextarea.style.height = '170px';
+      this.editjsonTextarea.style.width = '300px';
+      this.editjsonTextarea.style.display = 'block';
+      this.editjsonSave = this.getButton('Save','save','Save');
+      this.editjsonSave.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         self.saveJSON();
       });
-      this.editjson_cancel = this.getButton('Cancel','cancel','Cancel');
-      this.editjson_cancel.addEventListener('click',function(e) {
+      this.editjsonCancel = this.getButton('Cancel','cancel','Cancel');
+      this.editjsonCancel.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         self.hideEditJSON();
       });
-      this.editjson_holder.appendChild(this.editjson_textarea);
-      this.editjson_holder.appendChild(this.editjson_save);
-      this.editjson_holder.appendChild(this.editjson_cancel);
+      this.editjsonHolder.appendChild(this.editjsonTextarea);
+      this.editjsonHolder.appendChild(this.editjsonSave);
+      this.editjsonHolder.appendChild(this.editjsonCancel);
       
       // Manage Properties modal
-      this.addproperty_holder = this.theme.getModal();
-      this.addproperty_list = document.createElement('div');
-      this.addproperty_list.style.width = '295px';
-      this.addproperty_list.style.maxHeight = '160px';
-      this.addproperty_list.style.padding = '5px 0';
-      this.addproperty_list.style.overflowY = 'auto';
-      this.addproperty_list.style.overflowX = 'hidden';
-      this.addproperty_list.style.paddingLeft = '5px';
-      this.addproperty_list.setAttribute('class', 'property-selector');
-      this.addproperty_add = this.getButton('add','add','add');
-      this.addproperty_input = this.theme.getFormInputField('text');
-      this.addproperty_input.setAttribute('placeholder','Property name...');
-      this.addproperty_input.style.width = '220px';
-      this.addproperty_input.style.marginBottom = '0';
-      this.addproperty_input.style.display = 'inline-block';
-      this.addproperty_add.addEventListener('click',function(e) {
+      this.addpropertyHolder = this.theme.getModal();
+      this.addpropertyList = document.createElement('div');
+      this.addpropertyList.style.width = '295px';
+      this.addpropertyList.style.maxHeight = '160px';
+      this.addpropertyList.style.padding = '5px 0';
+      this.addpropertyList.style.overflowY = 'auto';
+      this.addpropertyList.style.overflowX = 'hidden';
+      this.addpropertyList.style.paddingLeft = '5px';
+      this.addpropertyList.setAttribute('class', 'property-selector');
+      this.addpropertyAdd = this.getButton('add','add','add');
+      this.addpropertyInput = this.theme.getFormInputField('text');
+      this.addpropertyInput.setAttribute('placeholder','Property name...');
+      this.addpropertyInput.style.width = '220px';
+      this.addpropertyInput.style.marginBottom = '0';
+      this.addpropertyInput.style.display = 'inline-block';
+      this.addpropertyAdd.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
-        if(self.addproperty_input.value) {
-          if(self.editors[self.addproperty_input.value]) {
+        if(self.addpropertyInput.value) {
+          if(self.editors[self.addpropertyInput.value]) {
             window.alert('there is already a property with that name');
             return;
           }
           
-          self.addObjectProperty(self.addproperty_input.value);
-          if(self.editors[self.addproperty_input.value]) {
-            self.editors[self.addproperty_input.value].disable();
+          self.addObjectProperty(self.addpropertyInput.value);
+          if(self.editors[self.addpropertyInput.value]) {
+            self.editors[self.addpropertyInput.value].disable();
           }
           self.onChange(true);
         }
       });
-      this.addproperty_holder.appendChild(this.addproperty_list);
-      this.addproperty_holder.appendChild(this.addproperty_input);
-      this.addproperty_holder.appendChild(this.addproperty_add);
+      this.addpropertyHolder.appendChild(this.addpropertyList);
+      this.addpropertyHolder.appendChild(this.addpropertyInput);
+      this.addpropertyHolder.appendChild(this.addpropertyAdd);
       var spacer = document.createElement('div');
       spacer.style.clear = 'both';
-      this.addproperty_holder.appendChild(spacer);
+      this.addpropertyHolder.appendChild(spacer);
       
       
       // Description
@@ -2648,21 +2653,21 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       }
       
       // Validation error placeholder area
-      this.error_holder = document.createElement('div');
-      this.container.appendChild(this.error_holder);
+      this.errorHolder = document.createElement('div');
+      this.container.appendChild(this.errorHolder);
       
       // Container for child editor area
-      this.editor_holder = this.theme.getIndentedPanel();
-      this.editor_holder.style.paddingBottom = '0';
-      this.container.appendChild(this.editor_holder);
+      this.editorHolder = this.theme.getIndentedPanel();
+      this.editorHolder.style.paddingBottom = '0';
+      this.container.appendChild(this.editorHolder);
 
       // Container for rows of child editors
-      this.row_container = this.theme.getGridContainer();
-      this.editor_holder.appendChild(this.row_container);
+      this.rowContainer = this.theme.getGridContainer();
+      this.editorHolder.appendChild(this.rowContainer);
 
       $each(this.editors, function(key,editor) {
         var holder = self.theme.getGridColumn();
-        self.row_container.appendChild(holder);
+        self.rowContainer.appendChild(holder);
 
         editor.setContainer(holder);
         editor.build();
@@ -2670,80 +2675,80 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       });
 
       // Control buttons
-      this.title_controls = this.theme.getHeaderButtonHolder();
-      this.editjson_controls = this.theme.getHeaderButtonHolder();
-      this.addproperty_controls = this.theme.getHeaderButtonHolder();
-      this.title.appendChild(this.title_controls);
-      this.title.appendChild(this.editjson_controls);
-      this.title.appendChild(this.addproperty_controls);
+      this.titleControls = this.theme.getHeaderButtonHolder();
+      this.editjsonControls = this.theme.getHeaderButtonHolder();
+      this.addpropertyControls = this.theme.getHeaderButtonHolder();
+      this.title.appendChild(this.titleControls);
+      this.title.appendChild(this.editjsonControls);
+      this.title.appendChild(this.addpropertyControls);
 
       // Show/Hide button
       this.collapsed = false;
-      this.toggle_button = this.getButton('','collapse','Collapse');
-      this.title_controls.appendChild(this.toggle_button);
-      this.toggle_button.addEventListener('click',function(e) {
+      this.toggleButton = this.getButton('','collapse','Collapse');
+      this.titleControls.appendChild(this.toggleButton);
+      this.toggleButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         if(self.collapsed) {
-          self.editor_holder.style.display = '';
+          self.editorHolder.style.display = '';
           self.collapsed = false;
-          self.setButtonText(self.toggle_button,'','collapse','Collapse');
+          self.setButtonText(self.toggleButton,'','collapse','Collapse');
         }
         else {
-          self.editor_holder.style.display = 'none';
+          self.editorHolder.style.display = 'none';
           self.collapsed = true;
-          self.setButtonText(self.toggle_button,'','expand','Expand');
+          self.setButtonText(self.toggleButton,'','expand','Expand');
         }
       });
 
       // If it should start collapsed
       if(this.options.collapsed) {
-        $trigger(this.toggle_button,'click');
+        $trigger(this.toggleButton,'click');
       }
       
       // Collapse button disabled
-      if(this.schema.options && typeof this.schema.options.disable_collapse !== "undefined") {
-        if(this.schema.options.disable_collapse) this.toggle_button.style.display = 'none';
+      if(this.schema.options && typeof this.schema.options.disableCollapse !== 'undefined') {
+        if(this.schema.options.disableCollapse) { this.toggleButton.style.display = 'none'; }
       }
-      else if(this.jsoneditor.options.disable_collapse) {
-        this.toggle_button.style.display = 'none';
+      else if(this.jsoneditor.options.disableCollapse) {
+        this.toggleButton.style.display = 'none';
       }
       
       // Edit JSON Button
-      this.editjson_button = this.getButton('JSON','edit','Edit JSON');
-      this.editjson_button.addEventListener('click',function(e) {
+      this.editjsonButton = this.getButton('JSON','edit','Edit JSON');
+      this.editjsonButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         self.toggleEditJSON();
       });
-      this.editjson_controls.appendChild(this.editjson_button);
-      this.editjson_controls.appendChild(this.editjson_holder);
+      this.editjsonControls.appendChild(this.editjsonButton);
+      this.editjsonControls.appendChild(this.editjsonHolder);
       
       // Edit JSON Buttton disabled
-      if(this.schema.options && typeof this.schema.options.disable_edit_json !== "undefined") {
-        if(this.schema.options.disable_edit_json) this.editjson_button.style.display = 'none';
+      if(this.schema.options && typeof this.schema.options.disableEditJson !== 'undefined') {
+        if(this.schema.options.disableEditJson) { this.editjsonButton.style.display = 'none'; }
       }
-      else if(this.jsoneditor.options.disable_edit_json) {
-        this.editjson_button.style.display = 'none';
+      else if(this.jsoneditor.options.disableEditJson) {
+        this.editjsonButton.style.display = 'none';
       }
       
       // Object Properties Button
-      this.addproperty_button = this.getButton('Properties','edit','Object Properties');
-      this.addproperty_button.addEventListener('click',function(e) {
+      this.addpropertyButton = this.getButton('Properties','edit','Object Properties');
+      this.addpropertyButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         self.toggleAddProperty();
       });
-      this.addproperty_controls.appendChild(this.addproperty_button);
-      this.addproperty_controls.appendChild(this.addproperty_holder);
+      this.addpropertyControls.appendChild(this.addpropertyButton);
+      this.addpropertyControls.appendChild(this.addpropertyHolder);
       this.refreshAddProperties();
     }
     
     // Fix table cell ordering
-    if(this.options.table_row) {
-      this.editor_holder = this.container;
-      $each(this.property_order,function(i,key) {
-        self.editor_holder.appendChild(self.editors[key].container);
+    if(this.options.tableRow) {
+      this.editorHolder = this.container;
+      $each(this.propertyOrder,function(i,key) {
+        self.editorHolder.appendChild(self.editors[key].container);
       });
     }
     // Layout object editors in grid if needed
@@ -2755,37 +2760,37 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     }
   },
   showEditJSON: function() {
-    if(!this.editjson_holder) return;
+    if(!this.editjsonHolder) { return; }
     this.hideAddProperty();
     
     // Position the form directly beneath the button
     // TODO: edge detection
-    this.editjson_holder.style.left = this.editjson_button.offsetLeft+"px";
-    this.editjson_holder.style.top = this.editjson_button.offsetTop + this.editjson_button.offsetHeight+"px";
+    this.editjsonHolder.style.left = this.editjsonButton.offsetLeft+'px';
+    this.editjsonHolder.style.top = this.editjsonButton.offsetTop + this.editjsonButton.offsetHeight+'px';
     
     // Start the textarea with the current value
-    this.editjson_textarea.value = JSON.stringify(this.getValue(),null,2);
+    this.editjsonTextarea.value = JSON.stringify(this.getValue(),null,2);
     
     // Disable the rest of the form while editing JSON
     this.disable();
     
-    this.editjson_holder.style.display = '';
-    this.editjson_button.disabled = false;
-    this.editing_json = true;
+    this.editjsonHolder.style.display = '';
+    this.editjsonButton.disabled = false;
+    this.editingJson = true;
   },
   hideEditJSON: function() {
-    if(!this.editjson_holder) return;
-    if(!this.editing_json) return;
+    if(!this.editjsonHolder) { return; }
+     if(!this.editingJson) { return; }
     
-    this.editjson_holder.style.display = 'none';
+    this.editjsonHolder.style.display = 'none';
     this.enable();
-    this.editing_json = false;
+    this.editingJson = false;
   },
   saveJSON: function() {
-    if(!this.editjson_holder) return;
+     if(!this.editjsonHolder) { return; }
     
     try {
-      var json = JSON.parse(this.editjson_textarea.value);
+      var json = JSON.parse(this.editjsonTextarea.value);
       this.setValue(json);
       this.hideEditJSON();
     }
@@ -2795,26 +2800,27 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     }
   },
   toggleEditJSON: function() {
-    if(this.editing_json) this.hideEditJSON();
-    else this.showEditJSON();
+     if(this.editingJson) { this.hideEditJSON(); }
+    else { this.showEditJSON(); }
   },
   insertPropertyControlUsingPropertyOrder: function (property, control, container) {
     var propertyOrder;
-    if (this.schema.properties[property])
+    if (this.schema.properties[property]) {
       propertyOrder = this.schema.properties[property].propertyOrder;
-    if (typeof propertyOrder !== "number") propertyOrder = 1000;
+    }
+     if (typeof propertyOrder !== 'number') { propertyOrder = 1000; }
     control.propertyOrder = propertyOrder;
 
     for (var i = 0; i < container.childNodes.length; i++) {
       var child = container.childNodes[i];
       if (control.propertyOrder < child.propertyOrder) {
-        this.addproperty_list.insertBefore(control, child);
+        this.addpropertyList.insertBefore(control, child);
         control = null;
         break;
       }
     }
     if (control) {
-      this.addproperty_list.appendChild(control);
+      this.addpropertyList.appendChild(control);
     }
   },
   addPropertyCheckbox: function(key) {
@@ -2824,10 +2830,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     checkbox = self.theme.getCheckbox();
     checkbox.style.width = 'auto';
 
-    if (this.schema.properties[key] && this.schema.properties[key].title)
+    if (this.schema.properties[key] && this.schema.properties[key].title) {
       labelText = this.schema.properties[key].title;
-    else
+    }
+    else {
       labelText = key;
+    }
 
     label = self.theme.getCheckboxLabel(labelText);
 
@@ -2836,7 +2844,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     control.style.height = 'auto';
     //control.style.overflowY = 'hidden';
 
-    this.insertPropertyControlUsingPropertyOrder(key, control, this.addproperty_list);
+    this.insertPropertyControlUsingPropertyOrder(key, control, this.addpropertyList);
 
     checkbox.checked = key in this.editors;
     checkbox.addEventListener('change',function() {
@@ -2848,39 +2856,39 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       }
       self.onChange(true);
     });
-    self.addproperty_checkboxes[key] = checkbox;
+    self.addpropertyCheckboxes[key] = checkbox;
     
     return checkbox;
   },
   showAddProperty: function() {
-    if(!this.addproperty_holder) return;
+     if(!this.addpropertyHolder) { return; }
     this.hideEditJSON();
     
     // Position the form directly beneath the button
     // TODO: edge detection
-    this.addproperty_holder.style.left = this.addproperty_button.offsetLeft+"px";
-    this.addproperty_holder.style.top = this.addproperty_button.offsetTop + this.addproperty_button.offsetHeight+"px";
+    this.addpropertyHolder.style.left = this.addpropertyButton.offsetLeft+'px';
+    this.addpropertyHolder.style.top = this.addpropertyButton.offsetTop + this.addpropertyButton.offsetHeight+'px';
     
     // Disable the rest of the form while editing JSON
     this.disable();
     
-    this.adding_property = true;
-    this.addproperty_button.disabled = false;
-    this.addproperty_holder.style.display = '';
+    this.addingProperty = true;
+    this.addpropertyButton.disabled = false;
+    this.addpropertyHolder.style.display = '';
     this.refreshAddProperties();
   },
   hideAddProperty: function() {
-    if(!this.addproperty_holder) return;
-    if(!this.adding_property) return;
+     if(!this.addpropertyHolder) { return; }
+     if(!this.addingProperty) { return; }
     
-    this.addproperty_holder.style.display = 'none';
+    this.addpropertyHolder.style.display = 'none';
     this.enable();
     
-    this.adding_property = false;
+    this.addingProperty = false;
   },
   toggleAddProperty: function() {
-    if(this.adding_property) this.hideAddProperty();
-    else this.showAddProperty();
+     if(this.addingProperty) { this.hideAddProperty(); }
+    else { this.showAddProperty(); }
   },
   removeObjectProperty: function(property) {
     if(this.editors[property]) {
@@ -2891,16 +2899,16 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       this.layoutEditors();
     }
   },
-  addObjectProperty: function(name, prebuild_only) {
+  addObjectProperty: function(name, prebuildOnly) {
     var self = this;
     
     // Property is already added
-    if(this.editors[name]) return;
+     if(this.editors[name]) { return; }
     
     // Property was added before and is cached
-    if(this.cached_editors[name]) {
-      this.editors[name] = this.cached_editors[name];
-      if(prebuild_only) return;
+    if(this.cachedEditors[name]) {
+      this.editors[name] = this.cachedEditors[name];
+       if(prebuildOnly) { return; }
       this.editors[name].register();
     }
     // New property
@@ -2923,19 +2931,19 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       });
       self.editors[name].preBuild();
       
-      if(!prebuild_only) {
+      if(!prebuildOnly) {
         var holder = self.theme.getChildEditorHolder();
-        self.editor_holder.appendChild(holder);
+        self.editorHolder.appendChild(holder);
         self.editors[name].setContainer(holder);
         self.editors[name].build();
         self.editors[name].postBuild();
       }
       
-      self.cached_editors[name] = self.editors[name];
+      self.cachedEditors[name] = self.editors[name];
     }
     
     // If we're only prebuilding the editors, don't refresh values
-    if(!prebuild_only) {
+    if(!prebuildOnly) {
       self.refreshValue();
       self.layoutEditors();
     }
@@ -2945,32 +2953,32 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this._super(editor);
   },
   canHaveAdditionalProperties: function() {
-    if (typeof this.schema.additionalProperties === "boolean") {
+    if (typeof this.schema.additionalProperties === 'boolean') {
       return this.schema.additionalProperties;
     }
-    return !this.jsoneditor.options.no_additional_properties;
+    return !this.jsoneditor.options.noAdditionalProperties;
   },
   destroy: function() {
-    $each(this.cached_editors, function(i,el) {
+    $each(this.cachedEditors, function(i,el) {
       el.destroy();
     });
-    if(this.editor_holder) this.editor_holder.innerHTML = '';
-    if(this.title && this.title.parentNode) this.title.parentNode.removeChild(this.title);
-    if(this.error_holder && this.error_holder.parentNode) this.error_holder.parentNode.removeChild(this.error_holder);
+     if(this.editorHolder) { this.editorHolder.innerHTML = ''; }
+     if(this.title && this.title.parentNode) { this.title.parentNode.removeChild(this.title); }
+     if(this.errorHolder && this.errorHolder.parentNode) { this.errorHolder.parentNode.removeChild(this.errorHolder); }
 
     this.editors = null;
-    this.cached_editors = null;
-    if(this.editor_holder && this.editor_holder.parentNode) this.editor_holder.parentNode.removeChild(this.editor_holder);
-    this.editor_holder = null;
+    this.cachedEditors = null;
+     if(this.editorHolder && this.editorHolder.parentNode) { this.editorHolder.parentNode.removeChild(this.editorHolder); }
+    this.editorHolder = null;
 
     this._super();
   },
   getValue: function() {
     var result = this._super();
-    if(this.jsoneditor.options.remove_empty_properties || this.options.remove_empty_properties) {
+    if(this.jsoneditor.options.removeEmptyProperties || this.options.removeEmptyProperties) {
       for(var i in result) {
         if(result.hasOwnProperty(i)) {
-          if(!result[i]) delete result[i];
+           if(!result[i]) { delete result[i]; }
         }
       }
     }
@@ -2981,110 +2989,110 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     var self = this;
     
     for(var i in this.editors) {
-      if(!this.editors.hasOwnProperty(i)) continue;
+       if(!this.editors.hasOwnProperty(i)) { continue; }
       this.value[i] = this.editors[i].getValue();
     }
     
-    if(this.adding_property) this.refreshAddProperties();
+     if(this.addingProperty) { this.refreshAddProperties(); }
   },
   refreshAddProperties: function() {
-    if(this.options.disable_properties || (this.options.disable_properties !== false && this.jsoneditor.options.disable_properties)) {
-      this.addproperty_controls.style.display = 'none';
+    if(this.options.disableProperties || (this.options.disableProperties !== false && this.jsoneditor.options.disableProperties)) {
+      this.addpropertyControls.style.display = 'none';
       return;
     }
 
-    var can_add = false, can_remove = false, num_props = 0, i, show_modal = false;
+    var canAdd = false, canRemove = false, numProps = 0, i, showModal = false;
     
     // Get number of editors
     for(i in this.editors) {
-      if(!this.editors.hasOwnProperty(i)) continue;
-      num_props++;
+       if(!this.editors.hasOwnProperty(i)) { continue; }
+      numProps++;
     }
     
     // Determine if we can add back removed properties
-    can_add = this.canHaveAdditionalProperties() && !(typeof this.schema.maxProperties !== "undefined" && num_props >= this.schema.maxProperties);
+    canAdd = this.canHaveAdditionalProperties() && !(typeof this.schema.maxProperties !== 'undefined' && numProps >= this.schema.maxProperties);
     
-    if(this.addproperty_checkboxes) {
-      this.addproperty_list.innerHTML = '';
+    if(this.addpropertyCheckboxes) {
+      this.addpropertyList.innerHTML = '';
     }
-    this.addproperty_checkboxes = {};
+    this.addpropertyCheckboxes = {};
     
     // Check for which editors can't be removed or added back
-    for(i in this.cached_editors) {
-      if(!this.cached_editors.hasOwnProperty(i)) continue;
+    for(i in this.cachedEditors) {
+       if(!this.cachedEditors.hasOwnProperty(i)) { continue; }
       
       this.addPropertyCheckbox(i);
       
-      if(this.isRequired(this.cached_editors[i]) && i in this.editors) {
-        this.addproperty_checkboxes[i].disabled = true;
+      if(this.isRequired(this.cachedEditors[i]) && i in this.editors) {
+        this.addpropertyCheckboxes[i].disabled = true;
       }
       
-      if(typeof this.schema.minProperties !== "undefined" && num_props <= this.schema.minProperties) {
-        this.addproperty_checkboxes[i].disabled = this.addproperty_checkboxes[i].checked;
-        if(!this.addproperty_checkboxes[i].checked) show_modal = true;
+      if(typeof this.schema.minProperties !== 'undefined' && numProps <= this.schema.minProperties) {
+        this.addpropertyCheckboxes[i].disabled = this.addpropertyCheckboxes[i].checked;
+         if(!this.addpropertyCheckboxes[i].checked) { showModal = true; }
       }
       else if(!(i in this.editors)) {
-        if(!can_add  && !this.schema.properties.hasOwnProperty(i)) {
-          this.addproperty_checkboxes[i].disabled = true;
+        if(!canAdd  && !this.schema.properties.hasOwnProperty(i)) {
+          this.addpropertyCheckboxes[i].disabled = true;
         }
         else {
-          this.addproperty_checkboxes[i].disabled = false;
-          show_modal = true;
+          this.addpropertyCheckboxes[i].disabled = false;
+          showModal = true;
         }
       }
       else {
-        show_modal = true;
-        can_remove = true;
+        showModal = true;
+        canRemove = true;
       }
     }
     
     if(this.canHaveAdditionalProperties()) {
-      show_modal = true;
+      showModal = true;
     }
     
     // Additional addproperty checkboxes not tied to a current editor
     for(i in this.schema.properties) {
-      if(!this.schema.properties.hasOwnProperty(i)) continue;
-      if(this.cached_editors[i]) continue;
-      show_modal = true;
+       if(!this.schema.properties.hasOwnProperty(i)) { continue; }
+       if(this.cachedEditors[i]) { continue; }
+      showModal = true;
       this.addPropertyCheckbox(i);
     }
     
     // If no editors can be added or removed, hide the modal button
-    if(!show_modal) {
+    if(!showModal) {
       this.hideAddProperty();
-      this.addproperty_controls.style.display = 'none';
+      this.addpropertyControls.style.display = 'none';
     }
     // If additional properties are disabled
     else if(!this.canHaveAdditionalProperties()) {
-      this.addproperty_add.style.display = 'none';
-      this.addproperty_input.style.display = 'none';
+      this.addpropertyAdd.style.display = 'none';
+      this.addpropertyInput.style.display = 'none';
     }
     // If no new properties can be added
-    else if(!can_add) {
-      this.addproperty_add.disabled = true;
+    else if(!canAdd) {
+      this.addpropertyAdd.disabled = true;
     }
     // If new properties can be added
     else {
-      this.addproperty_add.disabled = false;
+      this.addpropertyAdd.disabled = false;
     }
   },
   isRequired: function(editor) {
-    if(typeof editor.schema.required === "boolean") return editor.schema.required;
-    else if(Array.isArray(this.schema.required)) return this.schema.required.indexOf(editor.key) > -1;
-    else if(this.jsoneditor.options.required_by_default) return true;
-    else return false;
+     if(typeof editor.schema.required === 'boolean') { return editor.schema.required; }
+    else if(Array.isArray(this.schema.required)) { return this.schema.required.indexOf(editor.key) > -1; }
+    else if(this.jsoneditor.options.requiredByDefault) { return true; }
+    else { return false; }
   },
   setValue: function(value, initial) {
     var self = this;
     value = value || {};
     
-    if(typeof value !== "object" || Array.isArray(value)) value = {};
+     if(typeof value !== 'object' || Array.isArray(value)) { value = {}; }
 
     // First, set the values for all of the defined properties
-    $each(this.cached_editors, function(i,editor) {
+    $each(this.cachedEditors, function(i,editor) {
       // Value explicitly set
-      if(typeof value[i] !== "undefined") {
+      if(typeof value[i] !== 'undefined') {
         self.addObjectProperty(i);
         editor.setValue(value[i],initial);
       }
@@ -3099,9 +3107,9 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     });
 
     $each(value, function(i,val) {
-      if(!self.cached_editors[i]) {
+      if(!self.cachedEditors[i]) {
         self.addObjectProperty(i);
-        if(self.editors[i]) self.editors[i].setValue(val,initial);
+         if(self.editors[i]) { self.editors[i].setValue(val,initial); }
       }
     });
     
@@ -3113,36 +3121,36 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     var self = this;
 
     // Get all the errors that pertain to this editor
-    var my_errors = [];
-    var other_errors = [];
+    var myErrors = [];
+    var otherErrors = [];
     $each(errors, function(i,error) {
       if(error.path === self.path) {
-        my_errors.push(error);
+        myErrors.push(error);
       }
       else {
-        other_errors.push(error);
+        otherErrors.push(error);
       }
     });
 
     // Show errors for this editor
-    if(this.error_holder) {
-      if(my_errors.length) {
+    if(this.errorHolder) {
+      if(myErrors.length) {
         var message = [];
-        this.error_holder.innerHTML = '';
-        this.error_holder.style.display = '';
-        $each(my_errors, function(i,error) {
-          self.error_holder.appendChild(self.theme.getErrorMessage(error.message));
+        this.errorHolder.innerHTML = '';
+        this.errorHolder.style.display = '';
+        $each(myErrors, function(i,error) {
+          self.errorHolder.appendChild(self.theme.getErrorMessage(error.message));
         });
       }
       // Hide error area
       else {
-        this.error_holder.style.display = 'none';
+        this.errorHolder.style.display = 'none';
       }
     }
 
     // Show error for the table row if this is inside a table
-    if(this.options.table_row) {
-      if(my_errors.length) {
+    if(this.options.tableRow) {
+      if(myErrors.length) {
         this.theme.addTableRowError(this.container);
       }
       else {
@@ -3152,14 +3160,14 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
 
     // Show errors for child editors
     $each(this.editors, function(i,editor) {
-      editor.showValidationErrors(other_errors);
+      editor.showValidationErrors(otherErrors);
     });
   }
 });
 
 JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
   getDefault: function() {
-    return this.schema["default"] || [];
+    return this.schema['default'] || [];
   },
   register: function() {
     this._super();
@@ -3180,7 +3188,7 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
   getNumColumns: function() {
     var info = this.getItemInfo(0);
     // Tabs require extra horizontal space
-    if(this.tabs_holder) {
+    if(this.tabsHolder) {
       return Math.max(Math.min(12,info.width+2),4);
     }
     else {
@@ -3188,33 +3196,33 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     }
   },
   enable: function() {
-    if(this.add_row_button) this.add_row_button.disabled = false;
-    if(this.remove_all_rows_button) this.remove_all_rows_button.disabled = false;
-    if(this.delete_last_row_button) this.delete_last_row_button.disabled = false;
+     if(this.addRowButton) { this.addRowButton.disabled = false; }
+     if(this.removeAllRowsButton) { this.removeAllRowsButton.disabled = false; }
+     if(this.deleteLastRowButton) { this.deleteLastRowButton.disabled = false; }
 
     if(this.rows) {
       for(var i=0; i<this.rows.length; i++) {
         this.rows[i].enable();
 
-        if(this.rows[i].moveup_button) this.rows[i].moveup_button.disabled = false;
-        if(this.rows[i].movedown_button) this.rows[i].movedown_button.disabled = false;
-        if(this.rows[i].delete_button) this.rows[i].delete_button.disabled = false;
+         if(this.rows[i].moveupButton) { this.rows[i].moveupButton.disabled = false; }
+         if(this.rows[i].movedownButton) { this.rows[i].movedownButton.disabled = false; }
+         if(this.rows[i].deleteButton) { this.rows[i].deleteButton.disabled = false; }
       }
     }
     this._super();
   },
   disable: function() {
-    if(this.add_row_button) this.add_row_button.disabled = true;
-    if(this.remove_all_rows_button) this.remove_all_rows_button.disabled = true;
-    if(this.delete_last_row_button) this.delete_last_row_button.disabled = true;
+     if(this.addRowButton) { this.addRowButton.disabled = true; }
+     if(this.removeAllRowsButton) { this.removeAllRowsButton.disabled = true; }
+     if(this.deleteLastRowButton) { this.deleteLastRowButton.disabled = true; }
 
     if(this.rows) {
       for(var i=0; i<this.rows.length; i++) {
         this.rows[i].disable();
 
-        if(this.rows[i].moveup_button) this.rows[i].moveup_button.disabled = true;
-        if(this.rows[i].movedown_button) this.rows[i].movedown_button.disabled = true;
-        if(this.rows[i].delete_button) this.rows[i].delete_button.disabled = true;
+         if(this.rows[i].moveupButton) { this.rows[i].moveupButton.disabled = true; }
+         if(this.rows[i].movedownButton) { this.rows[i].movedownButton.disabled = true; }
+         if(this.rows[i].deleteButton) { this.rows[i].deleteButton.disabled = true; }
       }
     }
     this._super();
@@ -3224,9 +3232,9 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
 
     this.rows = [];
 
-    this.hide_delete_buttons = this.options.disable_array_delete || this.jsoneditor.options.disable_array_delete;
-    this.hide_move_buttons = this.options.disable_array_reorder || this.jsoneditor.options.disable_array_reorder;
-    this.hide_add_button = this.options.disable_array_add || this.jsoneditor.options.disable_array_add;
+    this.hideDeleteButtons = this.options.disableArrayDelete || this.jsoneditor.options.disableArrayDelete;
+    this.hideMoveButtons = this.options.disableArrayReorder || this.jsoneditor.options.disableArrayReorder;
+    this.hideAddButton = this.options.disableArrayAdd || this.jsoneditor.options.disableArrayAdd;
   },
   build: function() {
     var self = this;
@@ -3236,29 +3244,29 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
       this.header.textContent = this.getTitle();
       this.title = this.theme.getHeader(this.header);
       this.container.appendChild(this.title);
-      this.title_controls = this.theme.getHeaderButtonHolder();
-      this.title.appendChild(this.title_controls);
+      this.titleControls = this.theme.getHeaderButtonHolder();
+      this.title.appendChild(this.titleControls);
       if(this.schema.description) {
         this.description = this.theme.getDescription(this.schema.description);
         this.container.appendChild(this.description);
       }
-      this.error_holder = document.createElement('div');
-      this.container.appendChild(this.error_holder);
+      this.errorHolder = document.createElement('div');
+      this.container.appendChild(this.errorHolder);
 
       if(this.schema.format === 'tabs') {
         this.controls = this.theme.getHeaderButtonHolder();
         this.title.appendChild(this.controls);
-        this.tabs_holder = this.theme.getTabHolder();
-        this.container.appendChild(this.tabs_holder);
-        this.row_holder = this.theme.getTabContentHolder(this.tabs_holder);
+        this.tabsHolder = this.theme.getTabHolder();
+        this.container.appendChild(this.tabsHolder);
+        this.rowHolder = this.theme.getTabContentHolder(this.tabsHolder);
 
-        this.active_tab = null;
+        this.activeTab = null;
       }
       else {
         this.panel = this.theme.getIndentedPanel();
         this.container.appendChild(this.panel);
-        this.row_holder = document.createElement('div');
-        this.panel.appendChild(this.row_holder);
+        this.rowHolder = document.createElement('div');
+        this.panel.appendChild(this.rowHolder);
         this.controls = this.theme.getButtonHolder();
         this.panel.appendChild(this.controls);
       }
@@ -3268,8 +3276,8 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
         this.container.appendChild(this.panel);
         this.controls = this.theme.getButtonHolder();
         this.panel.appendChild(this.controls);
-        this.row_holder = document.createElement('div');
-        this.panel.appendChild(this.row_holder);
+        this.rowHolder = document.createElement('div');
+        this.panel.appendChild(this.rowHolder);
     }
 
     // Add controls
@@ -3281,16 +3289,16 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     this._super(editor);
   },
   getItemTitle: function() {
-    if(!this.item_title) {
+    if(!this.itemTitle) {
       if(this.schema.items && !Array.isArray(this.schema.items)) {
         var tmp = this.jsoneditor.expandRefs(this.schema.items);
-        this.item_title = tmp.title || 'item';
+        this.itemTitle = tmp.title || 'item';
       }
       else {
-        this.item_title = 'item';
+        this.itemTitle = 'item';
       }
     }
-    return this.item_title;
+    return this.itemTitle;
   },
   getItemSchema: function(i) {
     if(Array.isArray(this.schema.items)) {
@@ -3317,42 +3325,42 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     var schema = this.getItemSchema(i);
 
     // Check if it's cached
-    this.item_info = this.item_info || {};
+    this.itemInfo = this.itemInfo || {};
     var stringified = JSON.stringify(schema);
-    if(typeof this.item_info[stringified] !== "undefined") return this.item_info[stringified];
+     if(typeof this.itemInfo[stringified] !== 'undefined') { return this.itemInfo[stringified]; }
 
     // Get the schema for this item
     schema = this.jsoneditor.expandRefs(schema);
 
-    this.item_info[stringified] = {
-      title: schema.title || "item",
-      'default': schema["default"],
+    this.itemInfo[stringified] = {
+      title: schema.title || 'item',
+      'default': schema['default'],
       width: 12,
-      child_editors: schema.properties || schema.items
+      childEditors: schema.properties || schema.items
     };
 
-    return this.item_info[stringified];
+    return this.itemInfo[stringified];
   },
   getElementEditor: function(i) {
-    var item_info = this.getItemInfo(i);
+    var itemInfo = this.getItemInfo(i);
     var schema = this.getItemSchema(i);
     schema = this.jsoneditor.expandRefs(schema);
-    schema.title = item_info.title+' '+(i+1);
+    schema.title = itemInfo.title+' '+(i+1);
 
     var editor = this.jsoneditor.getEditorClass(schema);
 
     var holder;
-    if(this.tabs_holder) {
+    if(this.tabsHolder) {
       holder = this.theme.getTabContent();
     }
-    else if(item_info.child_editors) {
+    else if(itemInfo.childEditors) {
       holder = this.theme.getChildEditorHolder();
     }
     else {
       holder = this.theme.getIndentedPanel();
     }
 
-    this.row_holder.appendChild(holder);
+    this.rowHolder.appendChild(holder);
 
     var ret = this.jsoneditor.createEditor(editor,{
       jsoneditor: this.jsoneditor,
@@ -3366,30 +3374,30 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     ret.build();
     ret.postBuild();
 
-    if(!ret.title_controls) {
-      ret.array_controls = this.theme.getButtonHolder();
-      holder.appendChild(ret.array_controls);
+    if(!ret.titleControls) {
+      ret.arrayControls = this.theme.getButtonHolder();
+      holder.appendChild(ret.arrayControls);
     }
 
     return ret;
   },
   destroy: function() {
     this.empty();
-    if(this.title && this.title.parentNode) this.title.parentNode.removeChild(this.title);
-    if(this.description && this.description.parentNode) this.description.parentNode.removeChild(this.description);
-    if(this.row_holder && this.row_holder.parentNode) this.row_holder.parentNode.removeChild(this.row_holder);
-    if(this.controls && this.controls.parentNode) this.controls.parentNode.removeChild(this.controls);
-    if(this.panel && this.panel.parentNode) this.panel.parentNode.removeChild(this.panel);
+     if(this.title && this.title.parentNode) { this.title.parentNode.removeChild(this.title); }
+     if(this.description && this.description.parentNode) { this.description.parentNode.removeChild(this.description); }
+     if(this.rowHolder && this.rowHolder.parentNode) { this.rowHolder.parentNode.removeChild(this.rowHolder); }
+     if(this.controls && this.controls.parentNode) { this.controls.parentNode.removeChild(this.controls); }
+     if(this.panel && this.panel.parentNode) { this.panel.parentNode.removeChild(this.panel); }
 
-    this.rows = this.title = this.description = this.row_holder = this.panel = this.controls = null;
+    this.rows = this.title = this.description = this.rowHolder = this.panel = this.controls = null;
 
     this._super();
   },
   empty: function() {
-    if(!this.rows) return;
+     if(!this.rows) { return; }
     var self = this;
     $each(this.rows,function(i,row) {
-      if(row.tab && row.tab.parentNode) row.tab.parentNode.removeChild(row.tab);
+       if(row.tab && row.tab.parentNode) { row.tab.parentNode.removeChild(row.tab); }
       self.destroyRow(row);
       self.rows[i] = null;
     });
@@ -3398,8 +3406,8 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
   destroyRow: function(row) {
     var holder = row.container;
     row.destroy();
-    if(holder.parentNode) holder.parentNode.removeChild(holder);
-    if(row.tab && row.tab.parentNode) row.tab.parentNode.removeChild(row.tab);
+     if(holder.parentNode) { holder.parentNode.removeChild(holder); }
+     if(row.tab && row.tab.parentNode) { row.tab.parentNode.removeChild(row.tab); }
   },
   getMax: function() {
     if((Array.isArray(this.schema.items)) && this.schema.additionalItems === false) {
@@ -3409,16 +3417,16 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
       return this.schema.maxItems || Infinity;
     }
   },
-  refreshTabs: function(refresh_headers) {
+  refreshTabs: function(refreshHeaders) {
     var self = this;
     $each(this.rows, function(i,row) {
-      if(!row.tab) return;
+       if(!row.tab) { return; }
 
-      if(refresh_headers) {
-        row.tab_text.textContent = row.getHeaderText();
+      if(refreshHeaders) {
+        row.tabText.textContent = row.getHeaderText();
       }
       else {
-        if(row.tab === self.active_tab) {
+        if(row.tab === self.activeTab) {
           self.theme.markTabActive(row.tab);
           row.container.style.display = '';
         }
@@ -3433,15 +3441,15 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     // Update the array's value, adding/removing rows when necessary
     value = value || [];
 
-    if(!(Array.isArray(value))) value = [value];
+     if(!(Array.isArray(value))) { value = [value]; }
 
     var serialized = JSON.stringify(value);
-    if(serialized === this.serialized) return;
+     if(serialized === this.serialized) { return; }
 
     // Make sure value has between minItems and maxItems items in it
     if(this.schema.minItems) {
       while(value.length < this.schema.minItems) {
-        value.push(this.getItemInfo(value.length)["default"]);
+        value.push(this.getItemInfo(value.length)['default']);
       }
     }
     if(this.getMax() && value.length > this.getMax()) {
@@ -3466,16 +3474,16 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     self.rows = self.rows.slice(0,value.length);
 
     // Set the active tab
-    var new_active_tab = null;
+    var newActiveTab = null;
     $each(self.rows, function(i,row) {
-      if(row.tab === self.active_tab) {
-        new_active_tab = row.tab;
+      if(row.tab === self.activeTab) {
+        newActiveTab = row.tab;
         return false;
       }
     });
-    if(!new_active_tab && self.rows.length) new_active_tab = self.rows[0].tab;
+     if(!newActiveTab && self.rows.length) { newActiveTab = self.rows[0].tab; }
 
-    self.active_tab = new_active_tab;
+    self.activeTab = newActiveTab;
 
     self.refreshValue(initial);
     self.refreshTabs(true);
@@ -3501,22 +3509,22 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
 
       $each(this.rows,function(i,editor) {
         // Hide the move down button for the last row
-        if(editor.movedown_button) {
+        if(editor.movedownButton) {
           if(i === self.rows.length - 1) {
-            editor.movedown_button.style.display = 'none';
+            editor.movedownButton.style.display = 'none';
           }
           else {
-            editor.movedown_button.style.display = '';
+            editor.movedownButton.style.display = '';
           }
         }
 
         // Hide the delete button if we have minItems items
-        if(editor.delete_button) {
+        if(editor.deleteButton) {
           if(minItems) {
-            editor.delete_button.style.display = 'none';
+            editor.deleteButton.style.display = 'none';
           }
           else {
-            editor.delete_button.style.display = '';
+            editor.deleteButton.style.display = '';
           }
         }
 
@@ -3524,47 +3532,47 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
         self.value[i] = editor.getValue();
       });
 
-      var controls_needed = false;
+      var controlsNeeded = false;
 
       if(!this.value.length) {
-        this.delete_last_row_button.style.display = 'none';
-        this.remove_all_rows_button.style.display = 'none';
+        this.deleteLastRowButton.style.display = 'none';
+        this.removeAllRowsButton.style.display = 'none';
       }
       else if(this.value.length === 1) {
-        this.remove_all_rows_button.style.display = 'none';
+        this.removeAllRowsButton.style.display = 'none';
 
         // If there are minItems items in the array, hide the delete button beneath the rows
-        if(minItems || this.hide_delete_buttons) {
-          this.delete_last_row_button.style.display = 'none';
+        if(minItems || this.hideDeleteButtons) {
+          this.deleteLastRowButton.style.display = 'none';
         }
         else {
-          this.delete_last_row_button.style.display = '';
-          controls_needed = true;
+          this.deleteLastRowButton.style.display = '';
+          controlsNeeded = true;
         }
       }
       else {
         // If there are minItems items in the array, hide the delete button beneath the rows
-        if(minItems || this.hide_delete_buttons) {
-          this.delete_last_row_button.style.display = 'none';
-          this.remove_all_rows_button.style.display = 'none';
+        if(minItems || this.hideDeleteButtons) {
+          this.deleteLastRowButton.style.display = 'none';
+          this.removeAllRowsButton.style.display = 'none';
         }
         else {
-          this.delete_last_row_button.style.display = '';
-          this.remove_all_rows_button.style.display = '';
-          controls_needed = true;
+          this.deleteLastRowButton.style.display = '';
+          this.removeAllRowsButton.style.display = '';
+          controlsNeeded = true;
         }
       }
 
       // If there are maxItems in the array, hide the add button beneath the rows
-      if((this.getMax() && this.getMax() <= this.rows.length) || this.hide_add_button){
-        this.add_row_button.style.display = 'none';
+      if((this.getMax() && this.getMax() <= this.rows.length) || this.hideAddButton){
+        this.addRowButton.style.display = 'none';
       }
       else {
-        this.add_row_button.style.display = '';
-        controls_needed = true;
+        this.addRowButton.style.display = '';
+        controlsNeeded = true;
       }
 
-      if(!this.collapsed && controls_needed) {
+      if(!this.collapsed && controlsNeeded) {
         this.controls.style.display = 'inline-block';
       }
       else {
@@ -3578,28 +3586,28 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
 
     self.rows[i] = this.getElementEditor(i);
 
-    if(self.tabs_holder) {
-      self.rows[i].tab_text = document.createElement('span');
-      self.rows[i].tab_text.textContent = self.rows[i].getHeaderText();
-      self.rows[i].tab = self.theme.getTab(self.rows[i].tab_text);
+    if(self.tabsHolder) {
+      self.rows[i].tabText = document.createElement('span');
+      self.rows[i].tabText.textContent = self.rows[i].getHeaderText();
+      self.rows[i].tab = self.theme.getTab(self.rows[i].tabText);
       self.rows[i].tab.addEventListener('click', function(e) {
-        self.active_tab = self.rows[i].tab;
+        self.activeTab = self.rows[i].tab;
         self.refreshTabs();
         e.preventDefault();
         e.stopPropagation();
       });
 
-      self.theme.addTab(self.tabs_holder, self.rows[i].tab);
+      self.theme.addTab(self.tabsHolder, self.rows[i].tab);
     }
 
-    var controls_holder = self.rows[i].title_controls || self.rows[i].array_controls;
+    var controlsHolder = self.rows[i].titleControls || self.rows[i].arrayControls;
 
     // Buttons to delete row, move row up, and move row down
-    if(!self.hide_delete_buttons) {
-      self.rows[i].delete_button = this.getButton(self.getItemTitle(),'delete','Delete '+self.getItemTitle());
-      self.rows[i].delete_button.className += ' delete';
-      self.rows[i].delete_button.setAttribute('data-i',i);
-      self.rows[i].delete_button.addEventListener('click',function(e) {
+    if(!self.hideDeleteButtons) {
+      self.rows[i].deleteButton = this.getButton(self.getItemTitle(),'delete','Delete '+self.getItemTitle());
+      self.rows[i].deleteButton.className += ' delete';
+      self.rows[i].deleteButton.setAttribute('data-i',i);
+      self.rows[i].deleteButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         var i = this.getAttribute('data-i')*1;
@@ -3607,16 +3615,16 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
         var value = self.getValue();
 
         var newval = [];
-        var new_active_tab = null;
+        var newActiveTab = null;
         $each(value,function(j,row) {
           if(j===i) {
             // If the one we're deleting is the active tab
-            if(self.rows[j].tab === self.active_tab) {
+            if(self.rows[j].tab === self.activeTab) {
               // Make the next tab active if there is one
               // Note: the next tab is going to be the current tab after deletion
-              if(self.rows[j+1]) new_active_tab = self.rows[j].tab;
+               if(self.rows[j+1]) { newActiveTab = self.rows[j].tab; }
               // Otherwise, make the previous tab active if there is one
-              else if(j) new_active_tab = self.rows[j-1].tab;
+              else if(j) { newActiveTab = self.rows[j-1].tab; }
             }
 
             return; // If this is the one we're deleting
@@ -3624,208 +3632,208 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
           newval.push(row);
         });
         self.setValue(newval);
-        if(new_active_tab) {
-          self.active_tab = new_active_tab;
+        if(newActiveTab) {
+          self.activeTab = newActiveTab;
           self.refreshTabs();
         }
 
         self.onChange(true);
       });
 
-      if(controls_holder) {
-        controls_holder.appendChild(self.rows[i].delete_button);
+      if(controlsHolder) {
+        controlsHolder.appendChild(self.rows[i].deleteButton);
       }
     }
 
-    if(i && !self.hide_move_buttons) {
-      self.rows[i].moveup_button = this.getButton('','moveup','Move up');
-      self.rows[i].moveup_button.className += ' moveup';
-      self.rows[i].moveup_button.setAttribute('data-i',i);
-      self.rows[i].moveup_button.addEventListener('click',function(e) {
+    if(i && !self.hideMoveButtons) {
+      self.rows[i].moveupButton = this.getButton('','moveup','Move up');
+      self.rows[i].moveupButton.className += ' moveup';
+      self.rows[i].moveupButton.setAttribute('data-i',i);
+      self.rows[i].moveupButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         var i = this.getAttribute('data-i')*1;
 
-        if(i<=0) return;
+         if(i<=0) { return; }
         var rows = self.getValue();
         var tmp = rows[i-1];
         rows[i-1] = rows[i];
         rows[i] = tmp;
 
         self.setValue(rows);
-        self.active_tab = self.rows[i-1].tab;
+        self.activeTab = self.rows[i-1].tab;
         self.refreshTabs();
 
         self.onChange(true);
       });
 
-      if(controls_holder) {
-        controls_holder.appendChild(self.rows[i].moveup_button);
+      if(controlsHolder) {
+        controlsHolder.appendChild(self.rows[i].moveupButton);
       }
     }
 
-    if(!self.hide_move_buttons) {
-      self.rows[i].movedown_button = this.getButton('','movedown','Move down');
-      self.rows[i].movedown_button.className += ' movedown';
-      self.rows[i].movedown_button.setAttribute('data-i',i);
-      self.rows[i].movedown_button.addEventListener('click',function(e) {
+    if(!self.hideMoveButtons) {
+      self.rows[i].movedownButton = this.getButton('','movedown','Move down');
+      self.rows[i].movedownButton.className += ' movedown';
+      self.rows[i].movedownButton.setAttribute('data-i',i);
+      self.rows[i].movedownButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         var i = this.getAttribute('data-i')*1;
 
         var rows = self.getValue();
-        if(i>=rows.length-1) return;
+         if(i>=rows.length-1) { return; }
         var tmp = rows[i+1];
         rows[i+1] = rows[i];
         rows[i] = tmp;
 
         self.setValue(rows);
-        self.active_tab = self.rows[i+1].tab;
+        self.activeTab = self.rows[i+1].tab;
         self.refreshTabs();
         self.onChange(true);
       });
 
-      if(controls_holder) {
-        controls_holder.appendChild(self.rows[i].movedown_button);
+      if(controlsHolder) {
+        controlsHolder.appendChild(self.rows[i].movedownButton);
       }
     }
 
-    if(value) self.rows[i].setValue(value, initial);
+     if(value) { self.rows[i].setValue(value, initial); }
     self.refreshTabs();
   },
   addControls: function() {
     var self = this;
 
     this.collapsed = false;
-    this.toggle_button = this.getButton('','collapse','Collapse');
-    this.title_controls.appendChild(this.toggle_button);
-    var row_holder_display = self.row_holder.style.display;
-    var controls_display = self.controls.style.display;
-    this.toggle_button.addEventListener('click',function(e) {
+    this.toggleButton = this.getButton('','collapse','Collapse');
+    this.titleControls.appendChild(this.toggleButton);
+    var rowHolderDisplay = self.rowHolder.style.display;
+    var controlsDisplay = self.controls.style.display;
+    this.toggleButton.addEventListener('click',function(e) {
       e.preventDefault();
       e.stopPropagation();
       if(self.collapsed) {
         self.collapsed = false;
-        if(self.panel) self.panel.style.display = '';
-        self.row_holder.style.display = row_holder_display;
-        if(self.tabs_holder) self.tabs_holder.style.display = '';
-        self.controls.style.display = controls_display;
+         if(self.panel) { self.panel.style.display = ''; }
+        self.rowHolder.style.display = rowHolderDisplay;
+         if(self.tabsHolder) { self.tabsHolder.style.display = ''; }
+        self.controls.style.display = controlsDisplay;
         self.setButtonText(this,'','collapse','Collapse');
       }
       else {
         self.collapsed = true;
-        self.row_holder.style.display = 'none';
-        if(self.tabs_holder) self.tabs_holder.style.display = 'none';
+        self.rowHolder.style.display = 'none';
+         if(self.tabsHolder) { self.tabsHolder.style.display = 'none'; }
         self.controls.style.display = 'none';
-        if(self.panel) self.panel.style.display = 'none';
+         if(self.panel) { self.panel.style.display = 'none'; }
         self.setButtonText(this,'','expand','Expand');
       }
     });
 
     // If it should start collapsed
     if(this.options.collapsed) {
-      $trigger(this.toggle_button,'click');
+      $trigger(this.toggleButton,'click');
     }
 
     // Collapse button disabled
-    if(this.schema.options && typeof this.schema.options.disable_collapse !== "undefined") {
-      if(this.schema.options.disable_collapse) this.toggle_button.style.display = 'none';
+    if(this.schema.options && typeof this.schema.options.disableCollapse !== 'undefined') {
+       if(this.schema.options.disableCollapse) { this.toggleButton.style.display = 'none'; }
     }
-    else if(this.jsoneditor.options.disable_collapse) {
-      this.toggle_button.style.display = 'none';
+    else if(this.jsoneditor.options.disableCollapse) {
+      this.toggleButton.style.display = 'none';
     }
 
-    // Add "new row" and "delete last" buttons below editor
-    this.add_row_button = this.getButton(this.getItemTitle(),'add','Add '+this.getItemTitle());
+    // Add 'new row' and 'delete last' buttons below editor
+    this.addRowButton = this.getButton(this.getItemTitle(),'add','Add '+this.getItemTitle());
 
-    this.add_row_button.addEventListener('click',function(e) {
+    this.addRowButton.addEventListener('click',function(e) {
       e.preventDefault();
       e.stopPropagation();
       var i = self.rows.length;
       self.addRow();
-      self.active_tab = self.rows[i].tab;
+      self.activeTab = self.rows[i].tab;
       self.refreshTabs();
       self.refreshValue();
       self.onChange(true);
     });
-    self.controls.appendChild(this.add_row_button);
+    self.controls.appendChild(this.addRowButton);
 
-    this.delete_last_row_button = this.getButton('Last '+this.getItemTitle(),'delete','Delete Last '+this.getItemTitle());
-    this.delete_last_row_button.addEventListener('click',function(e) {
+    this.deleteLastRowButton = this.getButton('Last '+this.getItemTitle(),'delete','Delete Last '+this.getItemTitle());
+    this.deleteLastRowButton.addEventListener('click',function(e) {
       e.preventDefault();
       e.stopPropagation();
       var rows = self.getValue();
 
-      var new_active_tab = null;
-      if(self.rows.length > 1 && self.rows[self.rows.length-1].tab === self.active_tab) new_active_tab = self.rows[self.rows.length-2].tab;
+      var newActiveTab = null;
+       if(self.rows.length > 1 && self.rows[self.rows.length-1].tab === self.activeTab) { newActiveTab = self.rows[self.rows.length-2].tab; }
 
       rows.pop();
       self.setValue(rows);
-      if(new_active_tab) {
-        self.active_tab = new_active_tab;
+      if(newActiveTab) {
+        self.activeTab = newActiveTab;
         self.refreshTabs();
       }
       self.onChange(true);
     });
-    self.controls.appendChild(this.delete_last_row_button);
+    self.controls.appendChild(this.deleteLastRowButton);
 
-    this.remove_all_rows_button = this.getButton('All','delete','Delete All');
-    this.remove_all_rows_button.addEventListener('click',function(e) {
+    this.removeAllRowsButton = this.getButton('All','delete','Delete All');
+    this.removeAllRowsButton.addEventListener('click',function(e) {
       e.preventDefault();
       e.stopPropagation();
       self.setValue([]);
       self.onChange(true);
     });
-    self.controls.appendChild(this.remove_all_rows_button);
+    self.controls.appendChild(this.removeAllRowsButton);
 
     if(self.tabs) {
-      this.add_row_button.style.width = '100%';
-      this.add_row_button.style.textAlign = 'left';
-      this.add_row_button.style.marginBottom = '3px';
+      this.addRowButton.style.width = '100%';
+      this.addRowButton.style.textAlign = 'left';
+      this.addRowButton.style.marginBottom = '3px';
 
-      this.delete_last_row_button.style.width = '100%';
-      this.delete_last_row_button.style.textAlign = 'left';
-      this.delete_last_row_button.style.marginBottom = '3px';
+      this.deleteLastRowButton.style.width = '100%';
+      this.deleteLastRowButton.style.textAlign = 'left';
+      this.deleteLastRowButton.style.marginBottom = '3px';
 
-      this.remove_all_rows_button.style.width = '100%';
-      this.remove_all_rows_button.style.textAlign = 'left';
-      this.remove_all_rows_button.style.marginBottom = '3px';
+      this.removeAllRowsButton.style.width = '100%';
+      this.removeAllRowsButton.style.textAlign = 'left';
+      this.removeAllRowsButton.style.marginBottom = '3px';
     }
   },
   showValidationErrors: function(errors) {
     var self = this;
 
     // Get all the errors that pertain to this editor
-    var my_errors = [];
-    var other_errors = [];
+    var myErrors = [];
+    var otherErrors = [];
     $each(errors, function(i,error) {
       if(error.path === self.path) {
-        my_errors.push(error);
+        myErrors.push(error);
       }
       else {
-        other_errors.push(error);
+        otherErrors.push(error);
       }
     });
 
     // Show errors for this editor
-    if(this.error_holder) {
-      if(my_errors.length) {
+    if(this.errorHolder) {
+      if(myErrors.length) {
         var message = [];
-        this.error_holder.innerHTML = '';
-        this.error_holder.style.display = '';
-        $each(my_errors, function(i,error) {
-          self.error_holder.appendChild(self.theme.getErrorMessage(error.message));
+        this.errorHolder.innerHTML = '';
+        this.errorHolder.style.display = '';
+        $each(myErrors, function(i,error) {
+          self.errorHolder.appendChild(self.theme.getErrorMessage(error.message));
         });
       }
       // Hide error area
       else {
-        this.error_holder.style.display = 'none';
+        this.errorHolder.style.display = 'none';
       }
     }
 
     // Show errors for child editors
     $each(this.rows, function(i,row) {
-      row.showValidationErrors(other_errors);
+      row.showValidationErrors(otherErrors);
     });
   }
 });
@@ -3851,11 +3859,11 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     return Math.max(Math.min(12,this.width),3);
   },
   preBuild: function() {
-    var item_schema = this.jsoneditor.expandRefs(this.schema.items || {});
+    var itemSchema = this.jsoneditor.expandRefs(this.schema.items || {});
 
-    this.item_title = item_schema.title || 'row';
-    this.item_default = item_schema["default"] || null;
-    this.item_has_child_editors = item_schema.properties || item_schema.items;
+    this.itemTitle = itemSchema.title || 'row';
+    this.itemDefault = itemSchema['default'] || null;
+    this.itemHasChildEditors = itemSchema.properties || itemSchema.items;
     this.width = 12;
     this._super();
   },
@@ -3865,29 +3873,29 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     this.container.appendChild(this.table);
     this.thead = this.theme.getTableHead();
     this.table.appendChild(this.thead);
-    this.header_row = this.theme.getTableRow();
-    this.thead.appendChild(this.header_row);
-    this.row_holder = this.theme.getTableBody();
-    this.table.appendChild(this.row_holder);
+    this.headerRow = this.theme.getTableRow();
+    this.thead.appendChild(this.headerRow);
+    this.rowHolder = this.theme.getTableBody();
+    this.table.appendChild(this.rowHolder);
 
     // Determine the default value of array element
     var tmp = this.getElementEditor(0,true);
-    this.item_default = tmp.getDefault();
+    this.itemDefault = tmp.getDefault();
     this.width = tmp.getNumColumns() + 2;
     
     if(!this.options.compact) {
       this.title = this.theme.getHeader(this.getTitle());
       this.container.appendChild(this.title);
-      this.title_controls = this.theme.getHeaderButtonHolder();
-      this.title.appendChild(this.title_controls);
+      this.titleControls = this.theme.getHeaderButtonHolder();
+      this.title.appendChild(this.titleControls);
       if(this.schema.description) {
         this.description = this.theme.getDescription(this.schema.description);
         this.container.appendChild(this.description);
       }
       this.panel = this.theme.getIndentedPanel();
       this.container.appendChild(this.panel);
-      this.error_holder = document.createElement('div');
-      this.panel.appendChild(this.error_holder);
+      this.errorHolder = document.createElement('div');
+      this.panel.appendChild(this.errorHolder);
     }
     else {
       this.panel = document.createElement('div');
@@ -3898,25 +3906,25 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     this.controls = this.theme.getButtonHolder();
     this.panel.appendChild(this.controls);
 
-    if(this.item_has_child_editors) {
+    if(this.itemHasChildEditors) {
       var ce = tmp.getChildEditors();
-      var order = tmp.property_order || Object.keys(ce);
+      var order = tmp.propertyOrder || Object.keys(ce);
       for(var i=0; i<order.length; i++) {
         var th = self.theme.getTableHeaderCell(ce[order[i]].getTitle());
-        if(ce[order[i]].options.hidden) th.style.display = 'none';
-        self.header_row.appendChild(th);
+         if(ce[order[i]].options.hidden) { th.style.display = 'none'; }
+        self.headerRow.appendChild(th);
       }
     }
     else {
-      self.header_row.appendChild(self.theme.getTableHeaderCell(this.item_title));
+      self.headerRow.appendChild(self.theme.getTableHeaderCell(this.itemTitle));
     }
 
     tmp.destroy();
-    this.row_holder.innerHTML = '';
+    this.rowHolder.innerHTML = '';
 
     // Row Controls column
-    this.controls_header_cell = self.theme.getTableHeaderCell(" ");
-    self.header_row.appendChild(this.controls_header_cell);
+    this.controlsHeaderCell = self.theme.getTableHeaderCell(' ');
+    self.headerRow.appendChild(this.controlsHeaderCell);
 
     // Add controls
     this.addControls();
@@ -3926,29 +3934,29 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     this._super();
   },
   getItemDefault: function() {
-    return $extend({},{"default":this.item_default})["default"];
+    return $extend({},{'default':this.itemDefault})['default'];
   },
   getItemTitle: function() {
-    return this.item_title;
+    return this.itemTitle;
   },
   getElementEditor: function(i,ignore) {
-    var schema_copy = $extend({},this.schema.items);
-    var editor = this.jsoneditor.getEditorClass(schema_copy, this.jsoneditor);
-    var row = this.row_holder.appendChild(this.theme.getTableRow());
+    var schemaCopy = $extend({},this.schema.items);
+    var editor = this.jsoneditor.getEditorClass(schemaCopy, this.jsoneditor);
+    var row = this.rowHolder.appendChild(this.theme.getTableRow());
     var holder = row;
-    if(!this.item_has_child_editors) {
+    if(!this.itemHasChildEditors) {
       holder = this.theme.getTableCell();
       row.appendChild(holder);
     }
 
     var ret = this.jsoneditor.createEditor(editor,{
       jsoneditor: this.jsoneditor,
-      schema: schema_copy,
+      schema: schemaCopy,
       container: holder,
       path: this.path+'.'+i,
       parent: this,
       compact: true,
-      table_row: true
+      tableRow: true
     });
     
     ret.preBuild();
@@ -3956,25 +3964,25 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
       ret.build();
       ret.postBuild();
 
-      ret.controls_cell = row.appendChild(this.theme.getTableCell());
+      ret.controlsCell = row.appendChild(this.theme.getTableCell());
       ret.row = row;
-      ret.table_controls = this.theme.getButtonHolder();
-      ret.controls_cell.appendChild(ret.table_controls);
-      ret.table_controls.style.margin = 0;
-      ret.table_controls.style.padding = 0;
+      ret.tableControls = this.theme.getButtonHolder();
+      ret.controlsCell.appendChild(ret.tableControls);
+      ret.tableControls.style.margin = 0;
+      ret.tableControls.style.padding = 0;
     }
     
     return ret;
   },
   destroy: function() {
     this.innerHTML = '';
-    if(this.title && this.title.parentNode) this.title.parentNode.removeChild(this.title);
-    if(this.description && this.description.parentNode) this.description.parentNode.removeChild(this.description);
-    if(this.row_holder && this.row_holder.parentNode) this.row_holder.parentNode.removeChild(this.row_holder);
-    if(this.table && this.table.parentNode) this.table.parentNode.removeChild(this.table);
-    if(this.panel && this.panel.parentNode) this.panel.parentNode.removeChild(this.panel);
+     if(this.title && this.title.parentNode) { this.title.parentNode.removeChild(this.title); }
+     if(this.description && this.description.parentNode) { this.description.parentNode.removeChild(this.description); }
+     if(this.rowHolder && this.rowHolder.parentNode) { this.rowHolder.parentNode.removeChild(this.rowHolder); }
+     if(this.table && this.table.parentNode) { this.table.parentNode.removeChild(this.table); }
+     if(this.panel && this.panel.parentNode) { this.panel.parentNode.removeChild(this.panel); }
 
-    this.rows = this.title = this.description = this.row_holder = this.table = this.panel = null;
+    this.rows = this.title = this.description = this.rowHolder = this.table = this.panel = null;
 
     this._super();
   },
@@ -3993,9 +4001,9 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     }
     
     var serialized = JSON.stringify(value);
-    if(serialized === this.serialized) return;
+     if(serialized === this.serialized) { return; }
 
-    var numrows_changed = false;
+    var numrowsChanged = false;
 
     var self = this;
     $each(value,function(i,val) {
@@ -4005,24 +4013,24 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
       }
       else {
         self.addRow(val);
-        numrows_changed = true;
+        numrowsChanged = true;
       }
     });
 
     for(var j=value.length; j<self.rows.length; j++) {
       var holder = self.rows[j].container;
-      if(!self.item_has_child_editors) {
+      if(!self.itemHasChildEditors) {
         self.rows[j].row.parentNode.removeChild(self.rows[j].row);
       }
       self.rows[j].destroy();
-      if(holder.parentNode) holder.parentNode.removeChild(holder);
+       if(holder.parentNode) { holder.parentNode.removeChild(holder); }
       self.rows[j] = null;
-      numrows_changed = true;
+      numrowsChanged = true;
     }
     self.rows = self.rows.slice(0,value.length);
 
     self.refreshValue();
-    if(numrows_changed || initial) self.refreshRowButtons();
+     if(numrowsChanged || initial) { self.refreshRowButtons(); }
 
     self.onChange();
           
@@ -4034,95 +4042,95 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     // If we currently have minItems items in the array
     var minItems = this.schema.minItems && this.schema.minItems >= this.rows.length;
     
-    var need_row_buttons = false;
+    var needRowButtons = false;
     $each(this.rows,function(i,editor) {
       // Hide the move down button for the last row
-      if(editor.movedown_button) {
+      if(editor.movedownButton) {
         if(i === self.rows.length - 1) {
-          editor.movedown_button.style.display = 'none';
+          editor.movedownButton.style.display = 'none';
         }
         else {
-          need_row_buttons = true;
-          editor.movedown_button.style.display = '';
+          needRowButtons = true;
+          editor.movedownButton.style.display = '';
         }
       }
 
       // Hide the delete button if we have minItems items
-      if(editor.delete_button) {
+      if(editor.deleteButton) {
         if(minItems) {
-          editor.delete_button.style.display = 'none';
+          editor.deleteButton.style.display = 'none';
         }
         else {
-          need_row_buttons = true;
-          editor.delete_button.style.display = '';
+          needRowButtons = true;
+          editor.deleteButton.style.display = '';
         }
       }
       
-      if(editor.moveup_button) {
-        need_row_buttons = true;
+      if(editor.moveupButton) {
+        needRowButtons = true;
       }
     });
     
     // Show/hide controls column in table
     $each(this.rows,function(i,editor) {
-      if(need_row_buttons) {
-        editor.controls_cell.style.display = '';
+      if(needRowButtons) {
+        editor.controlsCell.style.display = '';
       }
       else {
-        editor.controls_cell.style.display = 'none';
+        editor.controlsCell.style.display = 'none';
       }
     });
-    if(need_row_buttons) {
-      this.controls_header_cell.style.display = '';
+    if(needRowButtons) {
+      this.controlsHeaderCell.style.display = '';
     }
     else {
-      this.controls_header_cell.style.display = 'none';
+      this.controlsHeaderCell.style.display = 'none';
     }
     
-    var controls_needed = false;
+    var controlsNeeded = false;
   
     if(!this.value.length) {
-      this.delete_last_row_button.style.display = 'none';
-      this.remove_all_rows_button.style.display = 'none';
+      this.deleteLastRowButton.style.display = 'none';
+      this.removeAllRowsButton.style.display = 'none';
       this.table.style.display = 'none';
     }
-    else if(this.value.length === 1  || this.hide_delete_buttons) {
+    else if(this.value.length === 1  || this.hideDeleteButtons) {
       this.table.style.display = '';
-      this.remove_all_rows_button.style.display = 'none';
+      this.removeAllRowsButton.style.display = 'none';
 
       // If there are minItems items in the array, hide the delete button beneath the rows
-      if(minItems || this.hide_delete_buttons) {
-        this.delete_last_row_button.style.display = 'none';
+      if(minItems || this.hideDeleteButtons) {
+        this.deleteLastRowButton.style.display = 'none';
       }
       else {
-        this.delete_last_row_button.style.display = '';
-        controls_needed = true;
+        this.deleteLastRowButton.style.display = '';
+        controlsNeeded = true;
       }
     }
     else {
       this.table.style.display = '';
       // If there are minItems items in the array, hide the delete button beneath the rows
-      if(minItems || this.hide_delete_buttons) {
-        this.delete_last_row_button.style.display = 'none';
-        this.remove_all_rows_button.style.display = 'none';
+      if(minItems || this.hideDeleteButtons) {
+        this.deleteLastRowButton.style.display = 'none';
+        this.removeAllRowsButton.style.display = 'none';
       }
       else {
-        this.delete_last_row_button.style.display = '';
-        this.remove_all_rows_button.style.display = '';
-        controls_needed = true;
+        this.deleteLastRowButton.style.display = '';
+        this.removeAllRowsButton.style.display = '';
+        controlsNeeded = true;
       }
     }
 
     // If there are maxItems in the array, hide the add button beneath the rows
-    if((this.schema.maxItems && this.schema.maxItems <= this.rows.length) || this.hide_add_button) {
-      this.add_row_button.style.display = 'none';
+    if((this.schema.maxItems && this.schema.maxItems <= this.rows.length) || this.hideAddButton) {
+      this.addRowButton.style.display = 'none';
     }
     else {
-      this.add_row_button.style.display = '';
-      controls_needed = true;
+      this.addRowButton.style.display = '';
+      controlsNeeded = true;
     }
     
-    if(!controls_needed) {
+    if(!controlsNeeded) {
       this.controls.style.display = 'none';
     }
     else {
@@ -4145,14 +4153,14 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
 
     self.rows[i] = this.getElementEditor(i);
 
-    var controls_holder = self.rows[i].table_controls;
+    var controlsHolder = self.rows[i].tableControls;
 
     // Buttons to delete row, move row up, and move row down
-    if(!this.hide_delete_buttons) {
-      self.rows[i].delete_button = this.getButton('','delete','Delete');
-      self.rows[i].delete_button.className += ' delete';
-      self.rows[i].delete_button.setAttribute('data-i',i);
-      self.rows[i].delete_button.addEventListener('click',function(e) {
+    if(!this.hideDeleteButtons) {
+      self.rows[i].deleteButton = this.getButton('','delete','Delete');
+      self.rows[i].deleteButton.className += ' delete';
+      self.rows[i].deleteButton.setAttribute('data-i',i);
+      self.rows[i].deleteButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         var i = this.getAttribute('data-i')*1;
@@ -4161,26 +4169,26 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
 
         var newval = [];
         $each(value,function(j,row) {
-          if(j===i) return; // If this is the one we're deleting
+          if(j===i) { return; } // If this is the one we're deleting
           newval.push(row);
         });
         self.setValue(newval);
         self.onChange(true);
       });
-      controls_holder.appendChild(self.rows[i].delete_button);
+      controlsHolder.appendChild(self.rows[i].deleteButton);
     }
 
     
-    if(i && !this.hide_move_buttons) {
-      self.rows[i].moveup_button = this.getButton('','moveup','Move up');
-      self.rows[i].moveup_button.className += ' moveup';
-      self.rows[i].moveup_button.setAttribute('data-i',i);
-      self.rows[i].moveup_button.addEventListener('click',function(e) {
+    if(i && !this.hideMoveButtons) {
+      self.rows[i].moveupButton = this.getButton('','moveup','Move up');
+      self.rows[i].moveupButton.className += ' moveup';
+      self.rows[i].moveupButton.setAttribute('data-i',i);
+      self.rows[i].moveupButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         var i = this.getAttribute('data-i')*1;
 
-        if(i<=0) return;
+         if(i<=0) { return; }
         var rows = self.getValue();
         var tmp = rows[i-1];
         rows[i-1] = rows[i];
@@ -4189,19 +4197,19 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
         self.setValue(rows);
         self.onChange(true);
       });
-      controls_holder.appendChild(self.rows[i].moveup_button);
+      controlsHolder.appendChild(self.rows[i].moveupButton);
     }
     
-    if(!this.hide_move_buttons) {
-      self.rows[i].movedown_button = this.getButton('','movedown','Move down');
-      self.rows[i].movedown_button.className += ' movedown';
-      self.rows[i].movedown_button.setAttribute('data-i',i);
-      self.rows[i].movedown_button.addEventListener('click',function(e) {
+    if(!this.hideMoveButtons) {
+      self.rows[i].movedownButton = this.getButton('','movedown','Move down');
+      self.rows[i].movedownButton.className += ' movedown';
+      self.rows[i].movedownButton.setAttribute('data-i',i);
+      self.rows[i].movedownButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
         var i = this.getAttribute('data-i')*1;
         var rows = self.getValue();
-        if(i>=rows.length-1) return;
+         if(i>=rows.length-1) { return; }
         var tmp = rows[i+1];
         rows[i+1] = rows[i];
         rows[i] = tmp;
@@ -4209,19 +4217,19 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
         self.setValue(rows);
         self.onChange(true);
       });
-      controls_holder.appendChild(self.rows[i].movedown_button);
+      controlsHolder.appendChild(self.rows[i].movedownButton);
     }
 
-    if(value) self.rows[i].setValue(value);
+     if(value) { self.rows[i].setValue(value); }
   },
   addControls: function() {
     var self = this;
 
     this.collapsed = false;
-    this.toggle_button = this.getButton('','collapse','Collapse');
-    if(this.title_controls) {
-      this.title_controls.appendChild(this.toggle_button);
-      this.toggle_button.addEventListener('click',function(e) {
+    this.toggleButton = this.getButton('','collapse','Collapse');
+    if(this.titleControls) {
+      this.titleControls.appendChild(this.toggleButton);
+      this.toggleButton.addEventListener('click',function(e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -4239,21 +4247,21 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
 
       // If it should start collapsed
       if(this.options.collapsed) {
-        $trigger(this.toggle_button,'click');
+        $trigger(this.toggleButton,'click');
       }
 
       // Collapse button disabled
-      if(this.schema.options && typeof this.schema.options.disable_collapse !== "undefined") {
-        if(this.schema.options.disable_collapse) this.toggle_button.style.display = 'none';
+      if(this.schema.options && typeof this.schema.options.disableCollapse !== 'undefined') {
+         if(this.schema.options.disableCollapse) { this.toggleButton.style.display = 'none'; }
       }
-      else if(this.jsoneditor.options.disable_collapse) {
-        this.toggle_button.style.display = 'none';
+      else if(this.jsoneditor.options.disableCollapse) {
+        this.toggleButton.style.display = 'none';
       }
     }
 
-    // Add "new row" and "delete last" buttons below editor
-    this.add_row_button = this.getButton(this.getItemTitle(),'add','Add '+this.getItemTitle());
-    this.add_row_button.addEventListener('click',function(e) {
+    // Add 'new row' and 'delete last' buttons below editor
+    this.addRowButton = this.getButton(this.getItemTitle(),'add','Add '+this.getItemTitle());
+    this.addRowButton.addEventListener('click',function(e) {
       e.preventDefault();
       e.stopPropagation();
       
@@ -4262,10 +4270,10 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
       self.refreshRowButtons();
       self.onChange(true);
     });
-    self.controls.appendChild(this.add_row_button);
+    self.controls.appendChild(this.addRowButton);
 
-    this.delete_last_row_button = this.getButton('Last '+this.getItemTitle(),'delete','Delete Last '+this.getItemTitle());
-    this.delete_last_row_button.addEventListener('click',function(e) {
+    this.deleteLastRowButton = this.getButton('Last '+this.getItemTitle(),'delete','Delete Last '+this.getItemTitle());
+    this.deleteLastRowButton.addEventListener('click',function(e) {
       e.preventDefault();
       e.stopPropagation();
       
@@ -4274,17 +4282,17 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
       self.setValue(rows);
       self.onChange(true);
     });
-    self.controls.appendChild(this.delete_last_row_button);
+    self.controls.appendChild(this.deleteLastRowButton);
 
-    this.remove_all_rows_button = this.getButton('All','delete','Delete All');
-    this.remove_all_rows_button.addEventListener('click',function(e) {
+    this.removeAllRowsButton = this.getButton('All','delete','Delete All');
+    this.removeAllRowsButton.addEventListener('click',function(e) {
       e.preventDefault();
       e.stopPropagation();
       
       self.setValue([]);
       self.onChange(true);
     });
-    self.controls.appendChild(this.remove_all_rows_button);
+    self.controls.appendChild(this.removeAllRowsButton);
   }
 });
 
@@ -4293,10 +4301,10 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
   register: function() {
     if(this.editors) {
       for(var i=0; i<this.editors.length; i++) {
-        if(!this.editors[i]) continue;
+         if(!this.editors[i]) { continue; }
         this.editors[i].unregister();
       }
-      if(this.editors[this.type]) this.editors[this.type].register();
+       if(this.editors[this.type]) { this.editors[this.type].register(); }
     }
     this._super();
   },
@@ -4304,19 +4312,19 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     this._super();
     if(this.editors) {
       for(var i=0; i<this.editors.length; i++) {
-        if(!this.editors[i]) continue;
+         if(!this.editors[i]) { continue; }
         this.editors[i].unregister();
       }
     }
   },
   getNumColumns: function() {
-    if(!this.editors[this.type]) return 4;
+     if(!this.editors[this.type]) { return 4; }
     return Math.max(this.editors[this.type].getNumColumns(),4);
   },
   enable: function() {
     if(this.editors) {
       for(var i=0; i<this.editors.length; i++) {
-        if(!this.editors[i]) continue;
+         if(!this.editors[i]) { continue; }
         this.editors[i].enable();
       }
     }
@@ -4326,7 +4334,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
   disable: function() {
     if(this.editors) {
       for(var i=0; i<this.editors.length; i++) {
-        if(!this.editors[i]) continue;
+         if(!this.editors[i]) { continue; }
         this.editors[i].disable();
       }
     }
@@ -4344,15 +4352,15 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
 
     self.register();
 
-    var current_value = self.getValue();
+    var currentValue = self.getValue();
 
     $each(self.editors,function(type,editor) {
-      if(!editor) return;
+       if(!editor) { return; }
       if(self.type === type) {
-        if(self.keep_values) editor.setValue(current_value,true);
+         if(self.keepValues) { editor.setValue(currentValue,true); }
         editor.container.style.display = '';
       }
-      else editor.container.style.display = 'none';
+      else { editor.container.style.display = 'none'; }
     });
     self.refreshValue();
     self.refreshHeaderText();
@@ -4361,11 +4369,11 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     var self = this;
     var type = this.types[i];
     var holder = self.theme.getChildEditorHolder();
-    self.editor_holder.appendChild(holder);
+    self.editorHolder.appendChild(holder);
 
     var schema;
 
-    if(typeof type === "string") {
+    if(typeof type === 'string') {
       schema = $extend({},self.schema);
       schema.type = type;
     }
@@ -4393,15 +4401,15 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     self.editors[i].build();
     self.editors[i].postBuild();
 
-    if(self.editors[i].header) self.editors[i].header.style.display = 'none';
+     if(self.editors[i].header) { self.editors[i].header.style.display = 'none'; }
 
-    self.editors[i].option = self.switcher_options[i];
+    self.editors[i].option = self.switcherOptions[i];
 
-    holder.addEventListener('change_header_text',function() {
+    holder.addEventListener('changeHeaderText',function() {
       self.refreshHeaderText();
     });
 
-    if(i !== self.type) holder.style.display = 'none';
+     if(i !== self.type) { holder.style.display = 'none'; }
   },
   preBuild: function() {
     var self = this;
@@ -4411,9 +4419,9 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     this.editors = [];
     this.validators = [];
 
-    this.keep_values = true;
-    if(typeof this.jsoneditor.options.keep_oneof_values !== "undefined") this.keep_values = this.jsoneditor.options.keep_oneof_values;
-    if(typeof this.options.keep_oneof_values !== "undefined") this.keep_values = this.options.keep_oneof_values;
+    this.keepValues = true;
+     if(typeof this.jsoneditor.options.keepOneofValues !== 'undefined') { this.keepValues = this.jsoneditor.options.keepOneofValues; }
+     if(typeof this.options.keepOneofValues !== 'undefined') { this.keepValues = this.options.keepOneofValues; }
 
     if(this.schema.oneOf) {
       this.oneOf = true;
@@ -4424,7 +4432,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
       delete this.schema.oneOf;
     }
     else {
-      if(!this.schema.type || this.schema.type === "any") {
+      if(!this.schema.type || this.schema.type === 'any') {
         this.types = ['string','number','integer','boolean','object','array','null'];
 
         // If any of these primitive types are disallowed
@@ -4433,11 +4441,11 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
           if(typeof disallow !== 'object' || !(Array.isArray(disallow))) {
             disallow = [disallow];
           }
-          var allowed_types = [];
+          var allowedTypes = [];
           $each(this.types,function(i,type) {
-            if(disallow.indexOf(type) === -1) allowed_types.push(type);
+             if(disallow.indexOf(type) === -1) { allowedTypes.push(type); }
           });
-          this.types = allowed_types;
+          this.types = allowedTypes;
         }
       }
       else if(Array.isArray(this.schema.type)) {
@@ -4449,7 +4457,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
       delete this.schema.type;
     }
 
-    this.display_text = this.getDisplayText(this.types);
+    this.displayText = this.getDisplayText(this.types);
   },
   build: function() {
     var self = this;
@@ -4458,26 +4466,26 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
     this.container.appendChild(this.header);
 
-    this.switcher = this.theme.getSwitcher(this.display_text);
+    this.switcher = this.theme.getSwitcher(this.displayText);
     container.appendChild(this.switcher);
     this.switcher.addEventListener('change',function(e) {
       e.preventDefault();
       e.stopPropagation();
 
-      self.switchEditor(self.display_text.indexOf(this.value));
+      self.switchEditor(self.displayText.indexOf(this.value));
       self.onChange(true);
     });
 
-    this.editor_holder = document.createElement('div');
-    container.appendChild(this.editor_holder);
+    this.editorHolder = document.createElement('div');
+    container.appendChild(this.editorHolder);
 
-    this.switcher_options = this.theme.getSwitcherOptions(this.switcher);
+    this.switcherOptions = this.theme.getSwitcherOptions(this.switcher);
     $each(this.types,function(i,type) {
       self.editors[i] = false;
 
       var schema;
 
-      if(typeof type === "string") {
+      if(typeof type === 'string') {
         schema = $extend({},self.schema);
         schema.type = type;
       }
@@ -4504,9 +4512,9 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     this._super();
   },
   refreshHeaderText: function() {
-    var display_text = this.getDisplayText(this.types);
-    $each(this.switcher_options, function(i,option) {
-      option.textContent = display_text[i];
+    var displayText = this.getDisplayText(this.types);
+    $each(this.switcherOptions, function(i,option) {
+      option.textContent = displayText[i];
     });
   },
   refreshValue: function() {
@@ -4518,7 +4526,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     $each(this.validators, function(i,validator) {
       if(!validator.validate(val).length) {
         self.type = i;
-        self.switcher.value = self.display_text[i];
+        self.switcher.value = self.displayText[i];
         return false;
       }
     });
@@ -4532,10 +4540,10 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
   },
   destroy: function() {
     $each(this.editors, function(type,editor) {
-      if(editor) editor.destroy();
+       if(editor) { editor.destroy(); }
     });
-    if(this.editor_holder && this.editor_holder.parentNode) this.editor_holder.parentNode.removeChild(this.editor_holder);
-    if(this.switcher && this.switcher.parentNode) this.switcher.parentNode.removeChild(this.switcher);
+     if(this.editorHolder && this.editorHolder.parentNode) { this.editorHolder.parentNode.removeChild(this.editorHolder); }
+     if(this.switcher && this.switcher.parentNode) { this.switcher.parentNode.removeChild(this.switcher); }
     this._super();
   },
   showValidationErrors: function(errors) {
@@ -4544,23 +4552,23 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     // oneOf error paths need to remove the oneOf[i] part before passing to child editors
     if(this.oneOf) {
       $each(this.editors,function(i,editor) {
-        if(!editor) return;
+         if(!editor) { return; }
         var check = self.path+'.oneOf['+i+']';
-        var new_errors = [];
+        var newErrors = [];
         $each(errors, function(j,error) {
           if(error.path.substr(0,check.length)===check) {
-            var new_error = $extend({},error);
-            new_error.path = self.path+new_error.path.substr(check.length);
-            new_errors.push(new_error);
+            var newError = $extend({},error);
+            newError.path = self.path+newError.path.substr(check.length);
+            newErrors.push(newError);
           }
         });
 
-        editor.showValidationErrors(new_errors);
+        editor.showValidationErrors(newErrors);
       });
     }
     else {
       $each(this.editors,function(type,editor) {
-        if(!editor) return;
+         if(!editor) { return; }
         editor.showValidationErrors(errors);
       });
     }
@@ -4572,11 +4580,11 @@ JSONEditor.defaults.editors.describedBy = JSONEditor.AbstractEditor.extend({
   register: function() {
     if (this.editors) {
       for (var i = 0; i < this.editors.length; i++) {
-        if (!this.editors[i]) continue;
+         if (!this.editors[i]) { continue; }
         this.editors[i].unregister();
       }
 
-      if (this.editors[this.currentEditor]) this.editors[this.currentEditor].register();
+       if (this.editors[this.currentEditor]) { this.editors[this.currentEditor].register(); }
     }
 
     this._super();
@@ -4586,19 +4594,19 @@ JSONEditor.defaults.editors.describedBy = JSONEditor.AbstractEditor.extend({
 
     if (this.editors) {
       for (var i = 0; i < this.editors.length; i++) {
-        if (!this.editors[i]) continue;
+         if (!this.editors[i]) { continue; }
         this.editors[i].unregister();
       }
     }
   },
   getNumColumns: function() {
-    if (!this.editors[this.currentEditor]) return 4;
+     if (!this.editors[this.currentEditor]) { return 4; }
     return Math.max(this.editors[this.currentEditor].getNumColumns(), 4);
   },
   enable: function() {
     if (this.editors) {
       for (var i = 0; i < this.editors.length; i++) {
-        if (!this.editors[i]) continue;
+         if (!this.editors[i]) { continue; }
         this.editors[i].enable();
       }
     }
@@ -4608,7 +4616,7 @@ JSONEditor.defaults.editors.describedBy = JSONEditor.AbstractEditor.extend({
   disable: function() {
     if (this.editors) {
       for (var i = 0; i < this.editors.length; i++) {
-        if (!this.editors[i]) continue;
+         if (!this.editors[i]) { continue; }
         this.editors[i].disable();
       }
     }
@@ -4619,7 +4627,7 @@ JSONEditor.defaults.editors.describedBy = JSONEditor.AbstractEditor.extend({
     var self = this;
     var vars = this.getWatchedFieldValues();
 
-    if (!vars) return;
+     if (!vars) { return; }
 
     //var ref = this.template.fillFromObject(vars);
     var ref = this.template(vars);
@@ -4633,7 +4641,7 @@ JSONEditor.defaults.editors.describedBy = JSONEditor.AbstractEditor.extend({
     this.register();
 
     $each(this.editors, function(ref, editor) {
-      if (!editor) return;
+       if (!editor) { return; }
       if (self.currentEditor === ref) {
         editor.container.style.display = '';
       } else {
@@ -4649,7 +4657,7 @@ JSONEditor.defaults.editors.describedBy = JSONEditor.AbstractEditor.extend({
     self.refs[ref] = i;
 
     var holder = self.theme.getChildEditorHolder();
-    self.editor_holder.appendChild(holder);
+    self.editorHolder.appendChild(holder);
 
     var schema = $extend({}, self.schema, self.jsoneditor.refs[ref]);
 
@@ -4677,17 +4685,17 @@ JSONEditor.defaults.editors.describedBy = JSONEditor.AbstractEditor.extend({
 
     for (var i = 0; i < this.schema.links.length; i++) {
       if (this.schema.links[i].rel.toLowerCase() === 'describedby') {
-        this.template = this.jsoneditor.compileTemplate(this.schema.links[i].href, this.template_engine);
+        this.template = this.jsoneditor.compileTemplate(this.schema.links[i].href, this.templateEngine);
         break;
       }
     }
 
     this.schema.links.splice(0, 1);
-    if (this.schema.links.length === 0) delete this.schema.links;
+     if (this.schema.links.length === 0) { delete this.schema.links; }
   },
   build: function() {
-    this.editor_holder = document.createElement('div');
-    this.container.appendChild(this.editor_holder);
+    this.editorHolder = document.createElement('div');
+    this.container.appendChild(this.editorHolder);
     this.switchEditor();
   },
   onWatchedFieldChange: function() {
@@ -4714,24 +4722,24 @@ JSONEditor.defaults.editors.describedBy = JSONEditor.AbstractEditor.extend({
   },
   destroy: function() {
     $each(this.editors, function(i, editor) {
-      if (editor) editor.destroy();
+       if (editor) { editor.destroy(); }
     });
 
-    if (this.editor_holder && this.editor_holder.parentNode) {
-      this.editor_holder.parentNode.removeChild(this.editor_holder);
+    if (this.editorHolder && this.editorHolder.parentNode) {
+      this.editorHolder.parentNode.removeChild(this.editorHolder);
     }
 
     this._super();
   },
   showValidationErrors: function(errors) {
     $each(this.editors, function(i, editor) {
-      if (!editor) return;
+       if (!editor) { return; }
       editor.showValidationErrors(errors);
     });
   }
 });
 // Enum Editor (used for objects and arrays with enumerated values)
-JSONEditor.defaults.editors["enum"] = JSONEditor.AbstractEditor.extend({
+JSONEditor.defaults.editors['enum'] = JSONEditor.AbstractEditor.extend({
   getNumColumns: function() {
     return 4;
   },
@@ -4740,45 +4748,45 @@ JSONEditor.defaults.editors["enum"] = JSONEditor.AbstractEditor.extend({
     this.title = this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
     this.container.appendChild(this.title);
 
-    this.options.enum_titles = this.options.enum_titles || [];
+    this.options.enumTitles = this.options.enumTitles || [];
 
-    this["enum"] = this.schema["enum"];
+    this['enum'] = this.schema['enum'];
     this.selected = 0;
-    this.select_options = [];
-    this.html_values = [];
+    this.selectOptions = [];
+    this.htmlValues = [];
 
     var self = this;
-    for(var i=0; i<this["enum"].length; i++) {
-      this.select_options[i] = this.options.enum_titles[i] || "Value "+(i+1);
-      this.html_values[i] = this.getHTML(this["enum"][i]);
+    for(var i=0; i<this['enum'].length; i++) {
+      this.selectOptions[i] = this.options.enumTitles[i] || 'Value '+(i+1);
+      this.htmlValues[i] = this.getHTML(this['enum'][i]);
     }
 
     // Switcher
-    this.switcher = this.theme.getSwitcher(this.select_options);
+    this.switcher = this.theme.getSwitcher(this.selectOptions);
     this.container.appendChild(this.switcher);
 
     // Display area
-    this.display_area = this.theme.getIndentedPanel();
-    this.container.appendChild(this.display_area);
+    this.displayArea = this.theme.getIndentedPanel();
+    this.container.appendChild(this.displayArea);
 
-    if(this.options.hide_display) this.display_area.style.display = "none";
+     if(this.options.hideDisplay) { this.displayArea.style.display = 'none'; }
 
     this.switcher.addEventListener('change',function() {
-      self.selected = self.select_options.indexOf(this.value);
-      self.value = self["enum"][self.selected];
+      self.selected = self.selectOptions.indexOf(this.value);
+      self.value = self['enum'][self.selected];
       self.refreshValue();
       self.onChange(true);
     });
-    this.value = this["enum"][0];
+    this.value = this['enum'][0];
     this.refreshValue();
 
-    if(this["enum"].length === 1) this.switcher.style.display = 'none';
+     if(this['enum'].length === 1) { this.switcher.style.display = 'none'; }
   },
   refreshValue: function() {
     var self = this;
     self.selected = -1;
     var stringified = JSON.stringify(this.value);
-    $each(this["enum"], function(i, el) {
+    $each(this['enum'], function(i, el) {
       if(stringified === JSON.stringify(el)) {
         self.selected = i;
         return false;
@@ -4786,15 +4794,15 @@ JSONEditor.defaults.editors["enum"] = JSONEditor.AbstractEditor.extend({
     });
 
     if(self.selected<0) {
-      self.setValue(self["enum"][0]);
+      self.setValue(self['enum'][0]);
       return;
     }
 
-    this.switcher.value = this.select_options[this.selected];
-    this.display_area.innerHTML = this.html_values[this.selected];
+    this.switcher.value = this.selectOptions[this.selected];
+    this.displayArea.innerHTML = this.htmlValues[this.selected];
   },
   enable: function() {
-    if(!this.always_disabled) this.switcher.disabled = false;
+     if(!this.alwaysDisabled) { this.switcher.disabled = false; }
     this._super();
   },
   disable: function() {
@@ -4808,7 +4816,7 @@ JSONEditor.defaults.editors["enum"] = JSONEditor.AbstractEditor.extend({
       return '<em>null</em>';
     }
     // Array or Object
-    else if(typeof el === "object") {
+    else if(typeof el === 'object') {
       // TODO: use theme
       var ret = '';
 
@@ -4825,17 +4833,17 @@ JSONEditor.defaults.editors["enum"] = JSONEditor.AbstractEditor.extend({
         ret += '<li>'+html+'</li>';
       });
 
-      if(Array.isArray(el)) ret = '<ol>'+ret+'</ol>';
-      else ret = "<ul style='margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;'>"+ret+'</ul>';
+       if(Array.isArray(el)) { ret = '<ol>'+ret+'</ol>'; }
+      else { ret = "<ul style='margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;'>"+ret+'</ul>'; }
 
       return ret;
     }
     // Boolean
-    else if(typeof el === "boolean") {
+    else if(typeof el === 'boolean') {
       return el? 'true' : 'false';
     }
     // String
-    else if(typeof el === "string") {
+    else if(typeof el === 'string') {
       return el.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
     // Number
@@ -4851,9 +4859,9 @@ JSONEditor.defaults.editors["enum"] = JSONEditor.AbstractEditor.extend({
     }
   },
   destroy: function() {
-    if(this.display_area && this.display_area.parentNode) this.display_area.parentNode.removeChild(this.display_area);
-    if(this.title && this.title.parentNode) this.title.parentNode.removeChild(this.title);
-    if(this.switcher && this.switcher.parentNode) this.switcher.parentNode.removeChild(this.switcher);
+     if(this.displayArea && this.displayArea.parentNode) { this.displayArea.parentNode.removeChild(this.displayArea); }
+     if(this.title && this.title.parentNode) { this.title.parentNode.removeChild(this.title); }
+     if(this.switcher && this.switcher.parentNode) { this.switcher.parentNode.removeChild(this.switcher); }
 
     this._super();
   }
@@ -4865,49 +4873,49 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
 
     // Sanitize value before setting it
     var sanitized = value;
-    if(this.enum_values.indexOf(sanitized) < 0) {
-      sanitized = this.enum_values[0];
+    if(this.enumValues.indexOf(sanitized) < 0) {
+      sanitized = this.enumValues[0];
     }
 
     if(this.value === sanitized) {
       return;
     }
 
-    this.input.value = this.enum_options[this.enum_values.indexOf(sanitized)];
-    if(this.select2) this.select2.select2('val',this.input.value);
+    this.input.value = this.enumOptions[this.enumValues.indexOf(sanitized)];
+     if(this.select2) { this.select2.select2('val',this.input.value); }
     this.value = sanitized;
     this.onChange();
   },
   register: function() {
     this._super();
-    if(!this.input) return;
+     if(!this.input) { return; }
     this.input.setAttribute('name',this.formname);
   },
   unregister: function() {
     this._super();
-    if(!this.input) return;
+     if(!this.input) { return; }
     this.input.removeAttribute('name');
   },
   getNumColumns: function() {
-    if(!this.enum_options) return 3;
-    var longest_text = this.getTitle().length;
-    for(var i=0; i<this.enum_options.length; i++) {
-      longest_text = Math.max(longest_text,this.enum_options[i].length+4);
+     if(!this.enumOptions) { return 3; }
+    var longestText = this.getTitle().length;
+    for(var i=0; i<this.enumOptions.length; i++) {
+      longestText = Math.max(longestText,this.enumOptions[i].length+4);
     }
-    return Math.min(12,Math.max(longest_text/7,2));
+    return Math.min(12,Math.max(longestText/7,2));
   },
   typecast: function(value) {
-    if(this.schema.type === "boolean") {
+    if(this.schema.type === 'boolean') {
       return !!value;
     }
-    else if(this.schema.type === "number") {
+    else if(this.schema.type === 'number') {
       return 1*value;
     }
-    else if(this.schema.type === "integer") {
+    else if(this.schema.type === 'integer') {
       return Math.floor(value*1);
     }
     else {
-      return ""+value;
+      return ''+value;
     }
   },
   getValue: function() {
@@ -4915,47 +4923,47 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
   },
   preBuild: function() {
     var self = this;
-    this.input_type = 'select';
-    this.enum_options = [];
-    this.enum_values = [];
-    this.enum_display = [];
+    this.inputType = 'select';
+    this.enumOptions = [];
+    this.enumValues = [];
+    this.enumDisplay = [];
 
     // Enum options enumerated
-    if(this.schema["enum"]) {
-      var display = this.schema.options && this.schema.options.enum_titles || [];
+    if(this.schema['enum']) {
+      var display = this.schema.options && this.schema.options.enumTitles || [];
       
-      $each(this.schema["enum"],function(i,option) {
-        self.enum_options[i] = ""+option;
-        self.enum_display[i] = ""+(display[i] || option);
-        self.enum_values[i] = self.typecast(option);
+      $each(this.schema['enum'],function(i,option) {
+        self.enumOptions[i] = ''+option;
+        self.enumDisplay[i] = ''+(display[i] || option);
+        self.enumValues[i] = self.typecast(option);
       });
 
       if(!this.isRequired()){
-        self.enum_display.unshift(' ');
-        self.enum_options.unshift('undefined');
-        self.enum_values.unshift(undefined);
+        self.enumDisplay.unshift(' ');
+        self.enumOptions.unshift('undefined');
+        self.enumValues.unshift(undefined);
       }
             
     }
     // Boolean
-    else if(this.schema.type === "boolean") {
-      self.enum_display = this.schema.options && this.schema.options.enum_titles || ['true','false'];
-      self.enum_options = ['1',''];
-      self.enum_values = [true,false];
+    else if(this.schema.type === 'boolean') {
+      self.enumDisplay = this.schema.options && this.schema.options.enumTitles || ['true','false'];
+      self.enumOptions = ['1',''];
+      self.enumValues = [true,false];
       
       if(!this.isRequired()){
-        self.enum_display.unshift(' ');
-        self.enum_options.unshift('undefined');
-        self.enum_values.unshift(undefined);
+        self.enumDisplay.unshift(' ');
+        self.enumOptions.unshift('undefined');
+        self.enumValues.unshift(undefined);
       }
     
     }
     // Dynamic Enum
     else if(this.schema.enumSource) {
       this.enumSource = [];
-      this.enum_display = [];
-      this.enum_options = [];
-      this.enum_values = [];
+      this.enumDisplay = [];
+      this.enumOptions = [];
+      this.enumValues = [];
       
       // Shortcut declaration for using a single array
       if(!(Array.isArray(this.schema.enumSource))) {
@@ -4978,7 +4986,7 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
       else {
         for(i=0; i<this.schema.enumSource.length; i++) {
           // Shorthand for watched variable
-          if(typeof this.schema.enumSource[i] === "string") {
+          if(typeof this.schema.enumSource[i] === 'string') {
             this.enumSource[i] = {
               source: this.schema.enumSource[i]
             };
@@ -4997,13 +5005,13 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
       // Walk through this array and fix up the values
       for(i=0; i<this.enumSource.length; i++) {
         if(this.enumSource[i].value) {
-          this.enumSource[i].value = this.jsoneditor.compileTemplate(this.enumSource[i].value, this.template_engine);
+          this.enumSource[i].value = this.jsoneditor.compileTemplate(this.enumSource[i].value, this.templateEngine);
         }
         if(this.enumSource[i].title) {
-          this.enumSource[i].title = this.jsoneditor.compileTemplate(this.enumSource[i].title, this.template_engine);
+          this.enumSource[i].title = this.jsoneditor.compileTemplate(this.enumSource[i].title, this.templateEngine);
         }
         if(this.enumSource[i].filter) {
-          this.enumSource[i].filter = this.jsoneditor.compileTemplate(this.enumSource[i].filter, this.template_engine);
+          this.enumSource[i].filter = this.jsoneditor.compileTemplate(this.enumSource[i].filter, this.templateEngine);
         }
       }
     }
@@ -5014,16 +5022,16 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
   },
   build: function() {
     var self = this;
-    if(!this.options.compact) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
-    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
+    if(!this.options.compact) { this.header = this.label = this.theme.getFormInputLabel(this.getTitle()); }
+     if(this.schema.description) { this.description = this.theme.getFormInputDescription(this.schema.description); }
 
-    if(this.options.compact) this.container.className += ' compact';
+     if(this.options.compact) { this.container.className += ' compact'; }
 
-    this.input = this.theme.getSelectInput(this.enum_options);
-    this.theme.setSelectOptions(this.input,this.enum_options,this.enum_display);
+    this.input = this.theme.getSelectInput(this.enumOptions);
+    this.theme.setSelectOptions(this.input,this.enumOptions,this.enumDisplay);
 
     if(this.schema.readOnly || this.schema.readonly) {
-      this.always_disabled = true;
+      this.alwaysDisabled = true;
       this.input.disabled = true;
     }
 
@@ -5036,25 +5044,25 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     this.control = this.theme.getFormControl(this.label, this.input, this.description);
     this.container.appendChild(this.control);
 
-    this.value = this.enum_values[0];
+    this.value = this.enumValues[0];
   },
   onInputChange: function() {
     var val = this.input.value;
 
     var sanitized = val;
-    if(this.enum_options.indexOf(val) === -1) {
-      sanitized = this.enum_options[0];
+    if(this.enumOptions.indexOf(val) === -1) {
+      sanitized = this.enumOptions[0];
     }
 
-    this.value = this.enum_values[this.enum_options.indexOf(val)];
+    this.value = this.enumValues[this.enumOptions.indexOf(val)];
 
     this.onChange(true);
   },
   setupSelect2: function() {
     // If the Select2 library is loaded use it when we have lots of items
-    if(window.jQuery && window.jQuery.fn && window.jQuery.fn.select2 && (this.enum_options.length > 2 || (this.enum_options.length && this.enumSource))) {
+    if(window.jQuery && window.jQuery.fn && window.jQuery.fn.select2 && (this.enumOptions.length > 2 || (this.enumOptions.length && this.enumSource))) {
       var options = $extend({},JSONEditor.plugins.select2);
-      if(this.schema.options && this.schema.options.select2_options) options = $extend(options,this.schema.options.select2_options);
+       if(this.schema.options && this.schema.options.select2Options) { options = $extend(options,this.schema.options.select2Options); }
       this.select2 = window.jQuery(this.input).select2(options);
       var self = this;
       this.select2.on('select2-blur',function() {
@@ -5077,14 +5085,14 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     // If this editor uses a dynamic select box
     if(this.enumSource) {
       vars = this.getWatchedFieldValues();
-      var select_options = [];
-      var select_titles = [];
+      var selectOptions = [];
+      var selectTitles = [];
       
       for(var i=0; i<this.enumSource.length; i++) {
         // Constant values
         if(Array.isArray(this.enumSource[i])) {
-          select_options = select_options.concat(this.enumSource[i]);
-          select_titles = select_titles.concat(this.enumSource[i]);
+          selectOptions = selectOptions.concat(this.enumSource[i]);
+          selectTitles = selectTitles.concat(this.enumSource[i]);
         }
         else {
           var items = [];
@@ -5103,73 +5111,73 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
             }
             // Filter the items
             if(this.enumSource[i].filter) {
-              var new_items = [];
+              var newItems = [];
               for(j=0; j<items.length; j++) {
-                if(this.enumSource[i].filter({i:j,item:items[j],watched:vars})) new_items.push(items[j]);
+                 if(this.enumSource[i].filter({i:j,item:items[j],watched:vars})) { newItems.push(items[j]); }
               }
-              items = new_items;
+              items = newItems;
             }
             
-            var item_titles = [];
-            var item_values = [];
+            var itemTitles = [];
+            var itemValues = [];
             for(j=0; j<items.length; j++) {
               var item = items[j];
               
               // Rendered value
               if(this.enumSource[i].value) {
-                item_values[j] = this.enumSource[i].value({
+                itemValues[j] = this.enumSource[i].value({
                   i: j,
                   item: item
                 });
               }
               // Use value directly
               else {
-                item_values[j] = items[j];
+                itemValues[j] = items[j];
               }
               
               // Rendered title
               if(this.enumSource[i].title) {
-                item_titles[j] = this.enumSource[i].title({
+                itemTitles[j] = this.enumSource[i].title({
                   i: j,
                   item: item
                 });
               }
               // Use value as the title also
               else {
-                item_titles[j] = item_values[j];
+                itemTitles[j] = itemValues[j];
               }
             }
             
             // TODO: sort
             
-            select_options = select_options.concat(item_values);
-            select_titles = select_titles.concat(item_titles);
+            selectOptions = selectOptions.concat(itemValues);
+            selectTitles = selectTitles.concat(itemTitles);
           }
         }
       }
       
-      var prev_value = this.value;
+      var prevValue = this.value;
       
-      this.theme.setSelectOptions(this.input, select_options, select_titles);
-      this.enum_options = select_options;
-      this.enum_display = select_titles;
-      this.enum_values = select_options;
+      this.theme.setSelectOptions(this.input, selectOptions, selectTitles);
+      this.enumOptions = selectOptions;
+      this.enumDisplay = selectTitles;
+      this.enumValues = selectOptions;
       
       if(this.select2) {
         this.select2.select2('destroy');
       }
       
       // If the previous value is still in the new select options, stick with it
-      if(select_options.indexOf(prev_value) !== -1) {
-        this.input.value = prev_value;
-        this.value = prev_value;
+      if(selectOptions.indexOf(prevValue) !== -1) {
+        this.input.value = prevValue;
+        this.value = prevValue;
       }
       // Otherwise, set the value to the first select option
       else {
-        this.input.value = select_options[0];
-        this.value = select_options[0] || "";  
-        if(this.parent) this.parent.onChildEditorChange(this);
-        else this.jsoneditor.onChange();
+        this.input.value = selectOptions[0];
+        this.value = selectOptions[0] || '';  
+         if(this.parent) { this.parent.onChildEditorChange(this); }
+        else { this.jsoneditor.onChange(); }
         this.jsoneditor.notifyWatchers(this.path);
       }
       
@@ -5179,21 +5187,21 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     this._super();
   },
   enable: function() {
-    if(!this.always_disabled) {
+    if(!this.alwaysDisabled) {
       this.input.disabled = false;
-      if(this.select2) this.select2.select2("enable",true);
+       if(this.select2) { this.select2.select2('enable',true); }
     }
     this._super();
   },
   disable: function() {
     this.input.disabled = true;
-    if(this.select2) this.select2.select2("enable",false);
+     if(this.select2) { this.select2.select2('enable',false); }
     this._super();
   },
   destroy: function() {
-    if(this.label && this.label.parentNode) this.label.parentNode.removeChild(this.label);
-    if(this.description && this.description.parentNode) this.description.parentNode.removeChild(this.description);
-    if(this.input && this.input.parentNode) this.input.parentNode.removeChild(this.input);
+     if(this.label && this.label.parentNode) { this.label.parentNode.removeChild(this.label); }
+     if(this.description && this.description.parentNode) { this.description.parentNode.removeChild(this.description); }
+     if(this.input && this.input.parentNode) { this.input.parentNode.removeChild(this.input); }
     if(this.select2) {
       this.select2.select2('destroy');
       this.select2 = null;
@@ -5207,52 +5215,52 @@ JSONEditor.defaults.editors.multiselect = JSONEditor.AbstractEditor.extend({
   preBuild: function() {
     this._super();
 
-    this.select_options = {};
-    this.select_values = {};
+    this.selectOptions = {};
+    this.selectValues = {};
 
-    var items_schema = this.jsoneditor.expandRefs(this.schema.items || {});
+    var itemsSchema = this.jsoneditor.expandRefs(this.schema.items || {});
 
-    var e = items_schema["enum"] || [];
-    this.option_keys = [];
+    var e = itemsSchema['enum'] || [];
+    this.optionKeys = [];
     for(i=0; i<e.length; i++) {
       // If the sanitized value is different from the enum value, don't include it
-      if(this.sanitize(e[i]) !== e[i]) continue;
+       if(this.sanitize(e[i]) !== e[i]) { continue; }
 
-      this.option_keys.push(e[i]+"");
-      this.select_values[e[i]+""] = e[i];
+      this.optionKeys.push(e[i]+'');
+      this.selectValues[e[i]+''] = e[i];
     }
   },
   build: function() {
     var self = this, i;
-    if(!this.options.compact) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
-    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
+    if(!this.options.compact) { this.header = this.label = this.theme.getFormInputLabel(this.getTitle()); }
+     if(this.schema.description) { this.description = this.theme.getFormInputDescription(this.schema.description); }
 
-    if((!this.schema.format && this.option_keys.length < 8) || this.schema.format === "checkbox") {
-      this.input_type = 'checkboxes';
+    if((!this.schema.format && this.optionKeys.length < 8) || this.schema.format === 'checkbox') {
+      this.inputType = 'checkboxes';
 
       this.inputs = {};
       this.controls = {};
-      for(i=0; i<this.option_keys.length; i++) {
-        this.inputs[this.option_keys[i]] = this.theme.getCheckbox();
-        this.select_options[this.option_keys[i]] = this.inputs[this.option_keys[i]];
-        var label = this.theme.getCheckboxLabel(this.option_keys[i]);
-        this.controls[this.option_keys[i]] = this.theme.getFormControl(label, this.inputs[this.option_keys[i]]);
+      for(i=0; i<this.optionKeys.length; i++) {
+        this.inputs[this.optionKeys[i]] = this.theme.getCheckbox();
+        this.selectOptions[this.optionKeys[i]] = this.inputs[this.optionKeys[i]];
+        var label = this.theme.getCheckboxLabel(this.optionKeys[i]);
+        this.controls[this.optionKeys[i]] = this.theme.getFormControl(label, this.inputs[this.optionKeys[i]]);
       }
 
       this.control = this.theme.getMultiCheckboxHolder(this.controls,this.label,this.description);
     }
     else {
-      this.input_type = 'select';
-      this.input = this.theme.getSelectInput(this.option_keys);
+      this.inputType = 'select';
+      this.input = this.theme.getSelectInput(this.optionKeys);
       this.input.multiple = true;
-      this.input.size = Math.min(10,this.option_keys.length);
+      this.input.size = Math.min(10,this.optionKeys.length);
 
-      for(i=0; i<this.option_keys.length; i++) {
-        this.select_options[this.option_keys[i]] = this.input.children[i];
+      for(i=0; i<this.optionKeys.length; i++) {
+        this.selectOptions[this.optionKeys[i]] = this.input.children[i];
       }
 
       if(this.schema.readOnly || this.schema.readonly) {
-        this.always_disabled = true;
+        this.alwaysDisabled = true;
         this.input.disabled = true;
       }
 
@@ -5264,31 +5272,31 @@ JSONEditor.defaults.editors.multiselect = JSONEditor.AbstractEditor.extend({
       e.preventDefault();
       e.stopPropagation();
 
-      var new_value = [];
-      for(i = 0; i<self.option_keys.length; i++) {
-        if(self.select_options[self.option_keys[i]].selected || self.select_options[self.option_keys[i]].checked) new_value.push(self.select_values[self.option_keys[i]]);
+      var newValue = [];
+      for(i = 0; i<self.optionKeys.length; i++) {
+         if(self.selectOptions[self.optionKeys[i]].selected || self.selectOptions[self.optionKeys[i]].checked) { newValue.push(self.selectValues[self.optionKeys[i]]); }
       }
 
-      self.updateValue(new_value);
+      self.updateValue(newValue);
       self.onChange(true);
     });
   },
   setValue: function(value, initial) {
     var i;
     value = value || [];
-    if(typeof value !== "object") value = [value];
-    else if(!(Array.isArray(value))) value = [];
+     if(typeof value !== 'object') { value = [value]; }
+    else if(!(Array.isArray(value))) { value = []; }
 
     // Make sure we are dealing with an array of strings so we can check for strict equality
     for(i=0; i<value.length; i++) {
-      if(typeof value[i] !== "string") value[i] += "";
+       if(typeof value[i] !== 'string') { value[i] += ''; }
     }
 
     // Update selected status of options
-    for(i in this.select_options) {
-      if(!this.select_options.hasOwnProperty(i)) continue;
+    for(i in this.selectOptions) {
+       if(!this.selectOptions.hasOwnProperty(i)) { continue; }
 
-      this.select_options[i][this.input_type === "select"? "selected" : "checked"] = (value.indexOf(i) !== -1);
+      this.selectOptions[i][this.inputType === 'select'? 'selected' : 'checked'] = (value.indexOf(i) !== -1);
     }
 
     this.updateValue(value);
@@ -5297,7 +5305,7 @@ JSONEditor.defaults.editors.multiselect = JSONEditor.AbstractEditor.extend({
   setupSelect2: function() {
     if(window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
         var options = window.jQuery.extend({},JSONEditor.plugins.select2);
-        if(this.schema.options && this.schema.options.select2_options) options = $extend(options,this.schema.options.select2_options);
+         if(this.schema.options && this.schema.options.select2Options) { options = $extend(options,this.schema.options.select2Options); }
         this.select2 = window.jQuery(this.input).select2(options);
         var self = this;
         this.select2.on('select2-blur',function() {
@@ -5320,62 +5328,62 @@ JSONEditor.defaults.editors.multiselect = JSONEditor.AbstractEditor.extend({
   },
   register: function() {
     this._super();
-    if(!this.input) return;
+     if(!this.input) { return; }
     this.input.setAttribute('name',this.formname);
   },
   unregister: function() {
     this._super();
-    if(!this.input) return;
+     if(!this.input) { return; }
     this.input.removeAttribute('name');
   },
   getNumColumns: function() {
-    var longest_text = this.getTitle().length;
-    for(var i in this.select_values) {
-      if(!this.select_values.hasOwnProperty(i)) continue;
-      longest_text = Math.max(longest_text,(this.select_values[i]+"").length+4);
+    var longestText = this.getTitle().length;
+    for(var i in this.selectValues) {
+       if(!this.selectValues.hasOwnProperty(i)) { continue; }
+      longestText = Math.max(longestText,(this.selectValues[i]+'').length+4);
     }
 
-    return Math.min(12,Math.max(longest_text/7,2));
+    return Math.min(12,Math.max(longestText/7,2));
   },
   updateValue: function(value) {
     var changed = false;
-    var new_value = [];
+    var newValue = [];
     for(var i=0; i<value.length; i++) {
-      if(!this.select_options[value[i]+""]) {
+      if(!this.selectOptions[value[i]+'']) {
         changed = true;
         continue;
       }
-      var sanitized = this.sanitize(this.select_values[value[i]]);
-      new_value.push(sanitized);
-      if(sanitized !== value[i]) changed = true;
+      var sanitized = this.sanitize(this.selectValues[value[i]]);
+      newValue.push(sanitized);
+       if(sanitized !== value[i]) { changed = true; }
     }
-    this.value = new_value;
-    if(this.select2) this.select2.select2('val',this.value);
+    this.value = newValue;
+     if(this.select2) { this.select2.select2('val',this.value); }
     return changed;
   },
   sanitize: function(value) {
-    if(this.schema.items.type === "number") {
+    if(this.schema.items.type === 'number') {
       return 1*value;
     }
-    else if(this.schema.items.type === "integer") {
+    else if(this.schema.items.type === 'integer') {
       return Math.floor(value*1);
     }
     else {
-      return ""+value;
+      return ''+value;
     }
   },
   enable: function() {
-    if(!this.always_disabled) {
+    if(!this.alwaysDisabled) {
       if(this.input) {
         this.input.disabled = false;
       }
       else if(this.inputs) {
         for(var i in this.inputs) {
-          if(!this.inputs.hasOwnProperty(i)) continue;
+           if(!this.inputs.hasOwnProperty(i)) { continue; }
           this.inputs[i].disabled = false;
         }
       }
-      if(this.select2) this.select2.select2("enable",true);
+       if(this.select2) { this.select2.select2('enable',true); }
     }
     this._super();
   },
@@ -5385,11 +5393,11 @@ JSONEditor.defaults.editors.multiselect = JSONEditor.AbstractEditor.extend({
     }
     else if(this.inputs) {
       for(var i in this.inputs) {
-        if(!this.inputs.hasOwnProperty(i)) continue;
+         if(!this.inputs.hasOwnProperty(i)) { continue; }
         this.inputs[i].disabled = true;
       }
     }
-    if(this.select2) this.select2.select2("enable",false);
+     if(this.select2) { this.select2.select2('enable',false); }
     this._super();
   },
   destroy: function() {
@@ -5405,7 +5413,7 @@ JSONEditor.defaults.editors.base64 = JSONEditor.AbstractEditor.extend({
   getNumColumns: function() {
     return 4;
   },
-  build: function() {    
+  build: function() {
     var self = this;
     this.title = this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
 
@@ -5415,7 +5423,7 @@ JSONEditor.defaults.editors.base64 = JSONEditor.AbstractEditor.extend({
     
     // Don't show uploader if this is readonly
     if(!this.schema.readOnly && !this.schema.readonly) {
-      if(!window.FileReader) throw "FileReader required for base64 editor";
+       if(!window.FileReader) { throw 'FileReader required for base64 editor'; }
       
       // File uploader
       this.uploader = this.theme.getFormInputField('file');
@@ -5444,22 +5452,22 @@ JSONEditor.defaults.editors.base64 = JSONEditor.AbstractEditor.extend({
     this.container.appendChild(this.control);
   },
   refreshPreview: function() {
-    if(this.last_preview === this.value) return;
-    this.last_preview = this.value;
+     if(this.lastPreview === this.value) { return; }
+    this.lastPreview = this.value;
     
     this.preview.innerHTML = '';
     
-    if(!this.value) return;
+     if(!this.value) { return; }
     
     var mime = this.value.match(/^data:([^;,]+)[;,]/);
-    if(mime) mime = mime[1];
+     if(mime) { mime = mime[1]; }
     
     if(!mime) {
       this.preview.innerHTML = '<em>Invalid data URI</em>';
     }
     else {
       this.preview.innerHTML = '<strong>Type:</strong> '+mime+', <strong>Size:</strong> '+Math.floor((this.value.length-this.value.split(',')[0].length-1)/1.33333)+' bytes';
-      if(mime.substr(0,5)==="image") {
+      if(mime.substr(0,5)==='image') {
         this.preview.innerHTML += '<br>';
         var img = document.createElement('img');
         img.style.maxWidth = '100%';
@@ -5470,11 +5478,11 @@ JSONEditor.defaults.editors.base64 = JSONEditor.AbstractEditor.extend({
     }
   },
   enable: function() {
-    if(this.uploader) this.uploader.disabled = false;
+     if(this.uploader) { this.uploader.disabled = false; }
     this._super();
   },
   disable: function() {
-    if(this.uploader) this.uploader.disabled = true;
+     if(this.uploader) { this.uploader.disabled = true; }
     this._super();
   },
   setValue: function(val) {
@@ -5486,10 +5494,10 @@ JSONEditor.defaults.editors.base64 = JSONEditor.AbstractEditor.extend({
     }
   },
   destroy: function() {
-    if(this.preview && this.preview.parentNode) this.preview.parentNode.removeChild(this.preview);
-    if(this.title && this.title.parentNode) this.title.parentNode.removeChild(this.title);
-    if(this.input && this.input.parentNode) this.input.parentNode.removeChild(this.input);
-    if(this.uploader && this.uploader.parentNode) this.uploader.parentNode.removeChild(this.uploader);
+     if(this.preview && this.preview.parentNode) { this.preview.parentNode.removeChild(this.preview); }
+     if(this.title && this.title.parentNode) { this.title.parentNode.removeChild(this.title); }
+     if(this.input && this.input.parentNode) { this.input.parentNode.removeChild(this.input); }
+     if(this.uploader && this.uploader.parentNode) { this.uploader.parentNode.removeChild(this.uploader); }
 
     this._super();
   }
@@ -5499,7 +5507,7 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
   getNumColumns: function() {
     return 4;
   },
-  build: function() {    
+  build: function() {
     var self = this;
     this.title = this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
 
@@ -5510,7 +5518,7 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
     // Don't show uploader if this is readonly
     if(!this.schema.readOnly && !this.schema.readonly) {
 
-      if(!this.jsoneditor.options.upload) throw "Upload handler required for upload editor";
+       if(!this.jsoneditor.options.upload) { throw 'Upload handler required for upload editor'; }
 
       // File uploader
       this.uploader = this.theme.getFormInputField('file');
@@ -5522,7 +5530,7 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
         if(this.files && this.files.length) {
           var fr = new FileReader();
           fr.onload = function(evt) {
-            self.preview_value = evt.target.result;
+            self.previewValue = evt.target.result;
             self.refreshPreview();
             self.onChange(true);
             fr = null;
@@ -5533,7 +5541,7 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
     }
 
     var description = this.schema.description;
-    if (!description) description = '';
+     if (!description) { description = ''; }
 
     this.preview = this.theme.getFormInputDescription(description);
     this.container.appendChild(this.preview);
@@ -5542,28 +5550,28 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
     this.container.appendChild(this.control);
   },
   refreshPreview: function() {
-    if(this.last_preview === this.preview_value) return;
-    this.last_preview = this.preview_value;
+     if(this.lastPreview === this.previewValue) { return; }
+    this.lastPreview = this.previewValue;
 
     this.preview.innerHTML = '';
     
-    if(!this.preview_value) return;
+     if(!this.previewValue) { return; }
 
     var self = this;
 
-    var mime = this.preview_value.match(/^data:([^;,]+)[;,]/);
-    if(mime) mime = mime[1];
-    if(!mime) mime = 'unknown';
+    var mime = this.previewValue.match(/^data:([^;,]+)[;,]/);
+     if(mime) { mime = mime[1]; }
+     if(!mime) { mime = 'unknown'; }
 
     var file = this.uploader.files[0];
 
     this.preview.innerHTML = '<strong>Type:</strong> '+mime+', <strong>Size:</strong> '+file.size+' bytes';
-    if(mime.substr(0,5)==="image") {
+    if(mime.substr(0,5)==='image') {
       this.preview.innerHTML += '<br>';
       var img = document.createElement('img');
       img.style.maxWidth = '100%';
       img.style.maxHeight = '100px';
-      img.src = this.preview_value;
+      img.src = this.previewValue;
       this.preview.appendChild(img);
     }
 
@@ -5573,7 +5581,7 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
     uploadButton.addEventListener('click',function(event) {
       event.preventDefault();
 
-      uploadButton.setAttribute("disabled", "disabled");
+      uploadButton.setAttribute('disabled', 'disabled');
       self.theme.removeInputError(self.uploader);
 
       if (self.theme.getProgressBar) {
@@ -5585,32 +5593,32 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
         success: function(url) {
           self.setValue(url);
 
-          if(self.parent) self.parent.onChildEditorChange(self);
-          else self.jsoneditor.onChange();
+           if(self.parent) { self.parent.onChildEditorChange(self); }
+          else { self.jsoneditor.onChange(); }
 
-          if (self.progressBar) self.preview.removeChild(self.progressBar);
-          uploadButton.removeAttribute("disabled");
+           if (self.progressBar) { self.preview.removeChild(self.progressBar); }
+          uploadButton.removeAttribute('disabled');
         },
         failure: function(error) {
           self.theme.addInputError(self.uploader, error);
-          if (self.progressBar) self.preview.removeChild(self.progressBar);
-          uploadButton.removeAttribute("disabled");
+           if (self.progressBar) { self.preview.removeChild(self.progressBar); }
+          uploadButton.removeAttribute('disabled');
         },
         updateProgress: function(progress) {
           if (self.progressBar) {
-            if (progress) self.theme.updateProgressBar(self.progressBar, progress);
-            else self.theme.updateProgressBarUnknown(self.progressBar);
+             if (progress) { self.theme.updateProgressBar(self.progressBar, progress); }
+            else { self.theme.updateProgressBarUnknown(self.progressBar); }
           }
         }
       });
     });
   },
   enable: function() {
-    if(this.uploader) this.uploader.disabled = false;
+     if(this.uploader) { this.uploader.disabled = false; }
     this._super();
   },
   disable: function() {
-    if(this.uploader) this.uploader.disabled = true;
+     if(this.uploader) { this.uploader.disabled = true; }
     this._super();
   },
   setValue: function(val) {
@@ -5621,10 +5629,10 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
     }
   },
   destroy: function() {
-    if(this.preview && this.preview.parentNode) this.preview.parentNode.removeChild(this.preview);
-    if(this.title && this.title.parentNode) this.title.parentNode.removeChild(this.title);
-    if(this.input && this.input.parentNode) this.input.parentNode.removeChild(this.input);
-    if(this.uploader && this.uploader.parentNode) this.uploader.parentNode.removeChild(this.uploader);
+     if(this.preview && this.preview.parentNode) { this.preview.parentNode.removeChild(this.preview); }
+     if(this.title && this.title.parentNode) { this.title.parentNode.removeChild(this.title); }
+     if(this.input && this.input.parentNode) { this.input.parentNode.removeChild(this.input); }
+     if(this.uploader && this.uploader.parentNode) { this.uploader.parentNode.removeChild(this.uploader); }
 
     this._super();
   }
@@ -5638,12 +5646,12 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
   },
   register: function() {
     this._super();
-    if(!this.input) return;
+     if(!this.input) { return; }
     this.input.setAttribute('name',this.formname);
   },
   unregister: function() {
     this._super();
-    if(!this.input) return;
+     if(!this.input) { return; }
     this.input.removeAttribute('name');
   },
   getNumColumns: function() {
@@ -5654,14 +5662,14 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
     if(!this.options.compact) {
       this.label = this.header = this.theme.getCheckboxLabel(this.getTitle());
     }
-    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
-    if(this.options.compact) this.container.className += ' compact';
+     if(this.schema.description) { this.description = this.theme.getFormInputDescription(this.schema.description); }
+     if(this.options.compact) { this.container.className += ' compact'; }
 
     this.input = this.theme.getCheckbox();
     this.control = this.theme.getFormControl(this.label, this.input, this.description);
 
     if(this.schema.readOnly || this.schema.readonly) {
-      this.always_disabled = true;
+      this.alwaysDisabled = true;
       this.input.disabled = true;
     }
 
@@ -5675,7 +5683,7 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
     this.container.appendChild(this.control);
   },
   enable: function() {
-    if(!this.always_disabled) {
+    if(!this.alwaysDisabled) {
       this.input.disabled = false;
     }
     this._super();
@@ -5685,9 +5693,9 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
     this._super();
   },
   destroy: function() {
-    if(this.label && this.label.parentNode) this.label.parentNode.removeChild(this.label);
-    if(this.description && this.description.parentNode) this.description.parentNode.removeChild(this.description);
-    if(this.input && this.input.parentNode) this.input.parentNode.removeChild(this.input);
+     if(this.label && this.label.parentNode) { this.label.parentNode.removeChild(this.label); }
+     if(this.description && this.description.parentNode) { this.description.parentNode.removeChild(this.description); }
+     if(this.input && this.input.parentNode) { this.input.parentNode.removeChild(this.input); }
     this._super();
   }
 });
@@ -5695,11 +5703,11 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
 var matchKey = (function () {
   var elem = document.documentElement;
 
-  if (elem.matches) return 'matches';
-  else if (elem.webkitMatchesSelector) return 'webkitMatchesSelector';
-  else if (elem.mozMatchesSelector) return 'mozMatchesSelector';
-  else if (elem.msMatchesSelector) return 'msMatchesSelector';
-  else if (elem.oMatchesSelector) return 'oMatchesSelector';
+   if (elem.matches) { return 'matches'; }
+  else if (elem.webkitMatchesSelector) { return 'webkitMatchesSelector'; }
+  else if (elem.mozMatchesSelector) { return 'mozMatchesSelector'; }
+  else if (elem.msMatchesSelector) { return 'msMatchesSelector'; }
+  else if (elem.oMatchesSelector) { return 'oMatchesSelector'; }
 })();
 
 JSONEditor.AbstractTheme = Class.extend({
@@ -5769,7 +5777,7 @@ JSONEditor.AbstractTheme = Class.extend({
   },
   getHeader: function(text) {
     var el = document.createElement('h3');
-    if(typeof text === "string") {
+    if(typeof text === 'string') {
       el.textContent = text;
     }
     else {
@@ -5793,19 +5801,19 @@ JSONEditor.AbstractTheme = Class.extend({
     }
 
     for(var i in controls) {
-      if(!controls.hasOwnProperty(i)) continue;
+       if(!controls.hasOwnProperty(i)) { continue; }
       controls[i].style.display = 'inline-block';
       controls[i].style.marginRight = '20px';
       el.appendChild(controls[i]);
     }
 
-    if(description) el.appendChild(description);
+     if(description) { el.appendChild(description); }
 
     return el;
   },
   getSelectInput: function(options) {
     var select = document.createElement('select');
-    if(options) this.setSelectOptions(select, options);
+     if(options) { this.setSelectOptions(select, options); }
     return select;
   },
   getSwitcher: function(options) {
@@ -5863,7 +5871,7 @@ JSONEditor.AbstractTheme = Class.extend({
   getFormControl: function(label, input, description) {
     var el = document.createElement('div');
     el.className = 'form-control';
-    if(label) el.appendChild(label);
+     if(label) { el.appendChild(label); }
     if(input.type === 'checkbox') {
       label.insertBefore(input,label.firstChild);
     }
@@ -5871,7 +5879,7 @@ JSONEditor.AbstractTheme = Class.extend({
       el.appendChild(input);
     }
 
-    if(description) el.appendChild(description);
+     if(description) { el.appendChild(description); }
     return el;
   },
   getIndentedPanel: function() {
@@ -5915,7 +5923,7 @@ JSONEditor.AbstractTheme = Class.extend({
       button.innerHTML += ' ';
     }
     button.appendChild(document.createTextNode(text));
-    if(title) button.setAttribute('title',title);
+     if(title) { button.setAttribute('title',title); }
   },
   getTable: function() {
     return document.createElement('table');
@@ -5961,7 +5969,7 @@ JSONEditor.AbstractTheme = Class.extend({
   applyStyles: function(el,styles) {
     el.style = el.style || {};
     for(var i in styles) {
-      if(!styles.hasOwnProperty(i)) continue;
+       if(!styles.hasOwnProperty(i)) { continue; }
       el.style[i] = styles[i];
     }
   },
@@ -5997,8 +6005,8 @@ JSONEditor.AbstractTheme = Class.extend({
     });
     return el;
   },
-  getTabContentHolder: function(tab_holder) {
-    return tab_holder.children[1];
+  getTabContentHolder: function(tabHolder) {
+    return tabHolder.children[1];
   },
   getTabContent: function() {
     return this.getIndentedPanel();
@@ -6078,7 +6086,7 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
     return el;
   },
   afterInputReady: function(input) {
-    if(input.controlgroup) return;
+     if(input.controlgroup) { return; }
     input.controlgroup = this.closest(input,'.control-group');
     input.controls = this.closest(input,'.controls');
     if(this.closest(input,'.compact')) {
@@ -6123,7 +6131,7 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
       ret.appendChild(controls);
     }
 
-    if(description) controls.appendChild(description);
+     if(description) { controls.appendChild(description); }
 
     return ret;
   },
@@ -6150,7 +6158,7 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
     return el;
   },
   addInputError: function(input,text) {
-    if(!input.controlgroup || !input.controls) return;
+     if(!input.controlgroup || !input.controls) { return; }
     input.controlgroup.className += ' error';
     if(!input.errmsg) {
       input.errmsg = document.createElement('p');
@@ -6164,7 +6172,7 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
     input.errmsg.textContent = text;
   },
   removeInputError: function(input) {
-    if(!input.errmsg) return;
+     if(!input.errmsg) { return; }
     input.errmsg.style.display = 'none';
     input.controlgroup.className = input.controlgroup.className.replace(/\s?error/g,'');
   },
@@ -6182,8 +6190,8 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
     el.appendChild(a);
     return el;
   },
-  getTabContentHolder: function(tab_holder) {
-    return tab_holder.children[1];
+  getTabContentHolder: function(tabHolder) {
+    return tabHolder.children[1];
   },
   getTabContent: function() {
     var el = document.createElement('div');
@@ -6211,12 +6219,12 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
     return container;
   },
   updateProgressBar: function(progressBar, progress) {
-    if (!progressBar) return;
+     if (!progressBar) { return; }
 
-    progressBar.firstChild.style.width = progress + "%";
+    progressBar.firstChild.style.width = progress + '%';
   },
   updateProgressBarUnknown: function(progressBar) {
-    if (!progressBar) return;
+     if (!progressBar) { return; }
 
     progressBar.className = 'progress progress-striped active';
     progressBar.firstChild.style.width = '100%';
@@ -6234,7 +6242,7 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
     el.className = 'col-md-'+size;
   },
   afterInputReady: function(input) {
-    if(input.controlgroup) return;
+     if(input.controlgroup) { return; }
     input.controlgroup = this.closest(input,'.form-group');
     if(this.closest(input,'.compact')) {
       input.controlgroup.style.marginBottom = 0;
@@ -6279,7 +6287,7 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
       group.appendChild(input);
     }
 
-    if(description) group.appendChild(description);
+     if(description) { group.appendChild(description); }
 
     return group;
   },
@@ -6318,7 +6326,7 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
   },
 
   addInputError: function(input,text) {
-    if(!input.controlgroup) return;
+     if(!input.controlgroup) { return; }
     input.controlgroup.className += ' has-error';
     if(!input.errmsg) {
       input.errmsg = document.createElement('p');
@@ -6332,7 +6340,7 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
     input.errmsg.textContent = text;
   },
   removeInputError: function(input) {
-    if(!input.errmsg) return;
+     if(!input.errmsg) { return; }
     input.errmsg.style.display = 'none';
     input.controlgroup.className = input.controlgroup.className.replace(/\s?has-error/g,'');
   },
@@ -6367,22 +6375,22 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
     bar.setAttribute('aria-valuenow', start);
     bar.setAttribute('aria-valuemin', min);
     bar.setAttribute('aria-valuenax', max);
-    bar.innerHTML = start + "%";
+    bar.innerHTML = start + '%';
     container.appendChild(bar);
 
     return container;
   },
   updateProgressBar: function(progressBar, progress) {
-    if (!progressBar) return;
+     if (!progressBar) { return; }
 
     var bar = progressBar.firstChild;
-    var percentage = progress + "%";
+    var percentage = progress + '%';
     bar.setAttribute('aria-valuenow', progress);
     bar.style.width = percentage;
     bar.innerHTML = percentage;
   },
   updateProgressBarUnknown: function(progressBar) {
-    if (!progressBar) return;
+     if (!progressBar) { return; }
 
     var bar = progressBar.firstChild;
     progressBar.className = 'progress progress-striped active';
@@ -6458,7 +6466,7 @@ JSONEditor.defaults.themes.foundation = JSONEditor.AbstractTheme.extend({
     return el;
   },
   addInputError: function(input,text) {
-    if(!input.group) return;
+     if(!input.group) { return; }
     input.group.className += ' error';
     
     if(!input.errmsg) {
@@ -6472,7 +6480,7 @@ JSONEditor.defaults.themes.foundation = JSONEditor.AbstractTheme.extend({
     input.errmsg.textContent = text;
   },
   removeInputError: function(input) {
-    if(!input.errmsg) return;
+     if(!input.errmsg) { return; }
     input.group.className = input.group.className.replace(/ error/g,'');
     input.errmsg.style.display = 'none';
   },
@@ -6487,11 +6495,11 @@ JSONEditor.defaults.themes.foundation = JSONEditor.AbstractTheme.extend({
     return progressBar;
   },
   updateProgressBar: function(progressBar, progress) {
-    if (!progressBar) return;
+     if (!progressBar) { return; }
     progressBar.firstChild.style.width = progress + '%';
   },
   updateProgressBarUnknown: function(progressBar) {
-    if (!progressBar) return;
+     if (!progressBar) { return; }
     progressBar.firstChild.style.width = '100%';
   }
 });
@@ -6526,8 +6534,8 @@ JSONEditor.defaults.themes.foundation3 = JSONEditor.defaults.themes.foundation.e
     el.appendChild(a);
     return el;
   },
-  getTabContentHolder: function(tab_holder) {
-    return tab_holder.children[1];
+  getTabContentHolder: function(tabHolder) {
+    return tabHolder.children[1];
   },
   getTabContent: function() {
     var el = document.createElement('div');
@@ -6596,8 +6604,8 @@ JSONEditor.defaults.themes.foundation5 = JSONEditor.defaults.themes.foundation.e
     el.appendChild(a);
     return el;
   },
-  getTabContentHolder: function(tab_holder) {
-    return tab_holder.children[1];
+  getTabContentHolder: function(tabHolder) {
+    return tabHolder.children[1];
   },
   getTabContent: function() {
     var el = document.createElement('div');
@@ -6679,7 +6687,7 @@ JSONEditor.defaults.themes.html = JSONEditor.AbstractTheme.extend({
   },
   removeInputError: function(input) {
     input.style.borderColor = '';
-    if(input.errmsg) input.errmsg.style.display = 'none';
+     if(input.errmsg) { input.errmsg.style.display = 'none'; }
   },
   getProgressBar: function() {
     var max = 100, start = 0;
@@ -6690,11 +6698,11 @@ JSONEditor.defaults.themes.html = JSONEditor.AbstractTheme.extend({
     return progressBar;
   },
   updateProgressBar: function(progressBar, progress) {
-    if (!progressBar) return;
+     if (!progressBar) { return; }
     progressBar.setAttribute('value', progress);
   },
   updateProgressBarUnknown: function(progressBar) {
-    if (!progressBar) return;
+     if (!progressBar) { return; }
     progressBar.removeAttribute('value');
   }
 });
@@ -6763,7 +6771,7 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
     return el;
   },
   getButton: function(text, icon, title) {
-    var button = document.createElement("button");
+    var button = document.createElement('button');
     button.className = 'ui-button ui-widget ui-state-default ui-corner-all';
 
     // Icon only
@@ -6785,7 +6793,7 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
 
     var el = document.createElement('span');
     el.className = 'ui-button-text';
-    el.textContent = text||title||".";
+    el.textContent = text||title||'.';
     button.appendChild(el);
 
     button.setAttribute('title',title);
@@ -6815,7 +6823,7 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
 
     var el = document.createElement('span');
     el.className = 'ui-button-text';
-    el.textContent = text||title||".";
+    el.textContent = text||title||'.';
     button.appendChild(el);
 
     button.setAttribute('title',title);
@@ -6828,11 +6836,11 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
     return el;
   },
   afterInputReady: function(input) {
-    if(input.controls) return;
+     if(input.controls) { return; }
     input.controls = this.closest(input,'.form-control');
   },
   addInputError: function(input,text) {
-    if(!input.controls) return;
+     if(!input.controls) { return; }
     if(!input.errmsg) {
       input.errmsg = document.createElement('div');
       input.errmsg.className = 'ui-state-error';
@@ -6845,7 +6853,7 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
     input.errmsg.textContent = text;
   },
   removeInputError: function(input) {
-    if(!input.errmsg) return;
+     if(!input.errmsg) { return; }
     input.errmsg.style.display = 'none';
   },
   markTabActive: function(tab) {
@@ -6860,7 +6868,7 @@ JSONEditor.AbstractIconLib = Class.extend({
   mapping: {
     collapse: '',
     expand: '',
-    "delete": '',
+    'delete': '',
     edit: '',
     add: '',
     cancel: '',
@@ -6868,15 +6876,15 @@ JSONEditor.AbstractIconLib = Class.extend({
     moveup: '',
     movedown: ''
   },
-  icon_prefix: '',
+  iconPrefix: '',
   getIconClass: function(key) {
-    if(this.mapping[key]) return this.icon_prefix+this.mapping[key];
-    else return null;
+     if(this.mapping[key]) { return this.iconPrefix+this.mapping[key]; }
+    else { return null; }
   },
   getIcon: function(key) {
     var iconclass = this.getIconClass(key);
     
-    if(!iconclass) return null;
+     if(!iconclass) { return null; }
     
     var i = document.createElement('i');
     i.className = iconclass;
@@ -6888,7 +6896,7 @@ JSONEditor.defaults.iconlibs.bootstrap2 = JSONEditor.AbstractIconLib.extend({
   mapping: {
     collapse: 'chevron-down',
     expand: 'chevron-up',
-    "delete": 'trash',
+    'delete': 'trash',
     edit: 'pencil',
     add: 'plus',
     cancel: 'ban-circle',
@@ -6896,14 +6904,14 @@ JSONEditor.defaults.iconlibs.bootstrap2 = JSONEditor.AbstractIconLib.extend({
     moveup: 'arrow-up',
     movedown: 'arrow-down'
   },
-  icon_prefix: 'icon-'
+  iconPrefix: 'icon-'
 });
 
 JSONEditor.defaults.iconlibs.bootstrap3 = JSONEditor.AbstractIconLib.extend({
   mapping: {
     collapse: 'chevron-down',
     expand: 'chevron-right',
-    "delete": 'remove',
+    'delete': 'remove',
     edit: 'pencil',
     add: 'plus',
     cancel: 'floppy-remove',
@@ -6911,14 +6919,14 @@ JSONEditor.defaults.iconlibs.bootstrap3 = JSONEditor.AbstractIconLib.extend({
     moveup: 'arrow-up',
     movedown: 'arrow-down'
   },
-  icon_prefix: 'glyphicon glyphicon-'
+  iconPrefix: 'glyphicon glyphicon-'
 });
 
 JSONEditor.defaults.iconlibs.fontawesome3 = JSONEditor.AbstractIconLib.extend({
   mapping: {
     collapse: 'chevron-down',
     expand: 'chevron-right',
-    "delete": 'remove',
+    'delete': 'remove',
     edit: 'pencil',
     add: 'plus',
     cancel: 'ban-circle',
@@ -6926,14 +6934,14 @@ JSONEditor.defaults.iconlibs.fontawesome3 = JSONEditor.AbstractIconLib.extend({
     moveup: 'arrow-up',
     movedown: 'arrow-down'
   },
-  icon_prefix: 'icon-'
+  iconPrefix: 'icon-'
 });
 
 JSONEditor.defaults.iconlibs.fontawesome4 = JSONEditor.AbstractIconLib.extend({
   mapping: {
     collapse: 'caret-square-o-down',
     expand: 'caret-square-o-right',
-    "delete": 'times',
+    'delete': 'times',
     edit: 'pencil',
     add: 'plus',
     cancel: 'ban',
@@ -6941,14 +6949,14 @@ JSONEditor.defaults.iconlibs.fontawesome4 = JSONEditor.AbstractIconLib.extend({
     moveup: 'arrow-up',
     movedown: 'arrow-down'
   },
-  icon_prefix: 'fa fa-'
+  iconPrefix: 'fa fa-'
 });
 
 JSONEditor.defaults.iconlibs.foundation2 = JSONEditor.AbstractIconLib.extend({
   mapping: {
     collapse: 'minus',
     expand: 'plus',
-    "delete": 'remove',
+    'delete': 'remove',
     edit: 'edit',
     add: 'add-doc',
     cancel: 'error',
@@ -6956,14 +6964,14 @@ JSONEditor.defaults.iconlibs.foundation2 = JSONEditor.AbstractIconLib.extend({
     moveup: 'up-arrow',
     movedown: 'down-arrow'
   },
-  icon_prefix: 'foundicon-'
+  iconPrefix: 'foundicon-'
 });
 
 JSONEditor.defaults.iconlibs.foundation3 = JSONEditor.AbstractIconLib.extend({
   mapping: {
     collapse: 'minus',
     expand: 'plus',
-    "delete": 'x',
+    'delete': 'x',
     edit: 'pencil',
     add: 'page-add',
     cancel: 'x-circle',
@@ -6971,14 +6979,14 @@ JSONEditor.defaults.iconlibs.foundation3 = JSONEditor.AbstractIconLib.extend({
     moveup: 'arrow-up',
     movedown: 'arrow-down'
   },
-  icon_prefix: 'fi-'
+  iconPrefix: 'fi-'
 });
 
 JSONEditor.defaults.iconlibs.jqueryui = JSONEditor.AbstractIconLib.extend({
   mapping: {
     collapse: 'triangle-1-s',
     expand: 'triangle-1-e',
-    "delete": 'trash',
+    'delete': 'trash',
     edit: 'pencil',
     add: 'plusthick',
     cancel: 'closethick',
@@ -6986,22 +6994,22 @@ JSONEditor.defaults.iconlibs.jqueryui = JSONEditor.AbstractIconLib.extend({
     moveup: 'arrowthick-1-n',
     movedown: 'arrowthick-1-s'
   },
-  icon_prefix: 'ui-icon ui-icon-'
+  iconPrefix: 'ui-icon ui-icon-'
 });
 
-JSONEditor.defaults.templates["default"] = function() {
+JSONEditor.defaults.templates['default'] = function() {
   return {
     compile: function(template) {
       var matches = template.match(/{{\s*([a-zA-Z0-9\-_ \.]+)\s*}}/g);
       var l = matches && matches.length;
 
       // Shortcut if the template contains no variables
-      if(!l) return function() { return template; };
+       if(!l) { return function() { return template; }; }
 
       // Pre-compute the search/replace functions
       // This drastically speeds up template execution
       var replacements = [];
-      var get_replacement = function(i) {
+      var getReplacement = function(i) {
         var p = matches[i].replace(/[{}]+/g,'').trim().split('.');
         var n = p.length;
         var func;
@@ -7012,7 +7020,7 @@ JSONEditor.defaults.templates["default"] = function() {
             cur = vars;
             for(i=0; i<n; i++) {
               cur = cur[p[i]];
-              if(!cur) break;
+               if(!cur) { break; }
             }
             return cur;
           };
@@ -7030,12 +7038,12 @@ JSONEditor.defaults.templates["default"] = function() {
         });
       };
       for(var i=0; i<l; i++) {
-        get_replacement(i);
+        getReplacement(i);
       }
 
       // The compiled function
       return function(vars) {
-        var ret = template+"";
+        var ret = template+'';
         var r;
         for(i=0; i<l; i++) {
           r = replacements[i];
@@ -7048,7 +7056,7 @@ JSONEditor.defaults.templates["default"] = function() {
 };
 
 JSONEditor.defaults.templates.ejs = function() {
-  if(!window.EJS) return false;
+   if(!window.EJS) { return false; }
 
   return {
     compile: function(template) {
@@ -7068,7 +7076,7 @@ JSONEditor.defaults.templates.handlebars = function() {
 };
 
 JSONEditor.defaults.templates.hogan = function() {
-  if(!window.Hogan) return false;
+   if(!window.Hogan) { return false; }
 
   return {
     compile: function(template) {
@@ -7081,7 +7089,7 @@ JSONEditor.defaults.templates.hogan = function() {
 };
 
 JSONEditor.defaults.templates.markup = function() {
-  if(!window.Mark || !window.Mark.up) return false;
+   if(!window.Mark || !window.Mark.up) { return false; }
 
   return {
     compile: function(template) {
@@ -7093,7 +7101,7 @@ JSONEditor.defaults.templates.markup = function() {
 };
 
 JSONEditor.defaults.templates.mustache = function() {
-  if(!window.Mustache) return false;
+   if(!window.Mustache) { return false; }
 
   return {
     compile: function(template) {
@@ -7109,7 +7117,7 @@ JSONEditor.defaults.templates.swig = function() {
 };
 
 JSONEditor.defaults.templates.underscore = function() {
-  if(!window._) return false;
+   if(!window._) { return false; }
 
   return {
     compile: function(template) {
@@ -7132,11 +7140,11 @@ JSONEditor.defaults.options = {};
 // String translate function
 JSONEditor.defaults.translate = function(key, variables) {
   var lang = JSONEditor.defaults.languages[JSONEditor.defaults.language];
-  if(!lang) throw "Unknown language "+JSONEditor.defaults.language;
+   if(!lang) { throw 'Unknown language '+JSONEditor.defaults.language; }
   
-  var string = lang[key] || JSONEditor.defaults.languages[JSONEditor.defaults.default_language][key];
+  var string = lang[key] || JSONEditor.defaults.languages[JSONEditor.defaults.defaultLanguage][key];
   
-  if(typeof string === "undefined") throw "Unknown translate string "+key;
+   if(typeof string === 'undefined') { throw 'Unknown translate string '+key; }
   
   if(variables) {
     for(var i=0; i<variables.length; i++) {
@@ -7148,134 +7156,134 @@ JSONEditor.defaults.translate = function(key, variables) {
 };
 
 // Translation strings and default languages
-JSONEditor.defaults.default_language = 'en';
-JSONEditor.defaults.language = JSONEditor.defaults.default_language;
+JSONEditor.defaults.defaultLanguage = 'en';
+JSONEditor.defaults.language = JSONEditor.defaults.defaultLanguage;
 JSONEditor.defaults.languages.en = {
   /**
    * When a property is not set
    */
-  error_notset: "Property must be set",
+  errorNotset: 'Property must be set',
   /**
    * When a string must not be empty
    */
-  error_notempty: "Value required",
+  errorNotempty: 'Value required',
   /**
    * When a value is not one of the enumerated values
    */
-  error_enum: "Value must be one of the enumerated values",
+  errorEnum: 'Value must be one of the enumerated values',
   /**
    * When a value doesn't validate any schema of a 'anyOf' combination
    */
-  error_anyOf: "Value must validate against at least one of the provided schemas",
+  errorAnyOf: 'Value must validate against at least one of the provided schemas',
   /**
    * When a value doesn't validate
    * @variables This key takes one variable: The number of schemas the value does not validate
    */
-  error_oneOf: 'Value must validate against exactly one of the provided schemas. It currently validates against {{0}} of the schemas.',
+  errorOneOf: 'Value must validate against exactly one of the provided schemas. It currently validates against {{0}} of the schemas.',
   /**
    * When a value does not validate a 'not' schema
    */
-  error_not: "Value must not validate against the provided schema",
+  errorNot: 'Value must not validate against the provided schema',
   /**
    * When a value does not match any of the provided types
    */
-  error_type_union: "Value must be one of the provided types",
+  errorTypeUnion: 'Value must be one of the provided types',
   /**
    * When a value does not match the given type
    * @variables This key takes one variable: The type the value should be of
    */
-  error_type: "Value must be of type {{0}}",
+  errorType: 'Value must be of type {{0}}',
   /**
    *  When the value validates one of the disallowed types
    */
-  error_disallow_union: "Value must not be one of the provided disallowed types",
+  errorDisallowUnion: 'Value must not be one of the provided disallowed types',
   /**
    *  When the value validates a disallowed type
    * @variables This key takes one variable: The type the value should not be of
    */
-  error_disallow: "Value must not be of type {{0}}",
+  errorDisallow: 'Value must not be of type {{0}}',
   /**
    * When a value is not a multiple of or divisible by a given number
    * @variables This key takes one variable: The number mentioned above
    */
-  error_multipleOf: "Value must be a multiple of {{0}}",
+  errorMultipleOf: 'Value must be a multiple of {{0}}',
   /**
    * When a value is greater than it's supposed to be (exclusive)
    * @variables This key takes one variable: The maximum
    */
-  error_maximum_excl: "Value must be less than {{0}}",
+  errorMaximumExcl: 'Value must be less than {{0}}',
   /**
    * When a value is greater than it's supposed to be (inclusive
    * @variables This key takes one variable: The maximum
    */
-  error_maximum_incl: "Value must at most {{0}}",
+  errorMaximumIncl: 'Value must at most {{0}}',
   /**
    * When a value is lesser than it's supposed to be (exclusive)
    * @variables This key takes one variable: The minimum
    */
-  error_minimum_excl: "Value must be greater than {{0}}",
+  errorMinimumExcl: 'Value must be greater than {{0}}',
   /**
    * When a value is lesser than it's supposed to be (inclusive)
    * @variables This key takes one variable: The minimum
    */
-  error_minimum_incl: "Value must be at least {{0}}",
+  errorMinimumIncl: 'Value must be at least {{0}}',
   /**
    * When a value have too many characters
    * @variables This key takes one variable: The maximum character count
    */
-  error_maxLength: "Value must be at most {{0}} characters long",
+  errorMaxLength: 'Value must be at most {{0}} characters long',
   /**
    * When a value does not have enough characters
    * @variables This key takes one variable: The minimum character count
    */
-  error_minLength: "Value must be at least {{0}} characters long",
+  errorMinLength: 'Value must be at least {{0}} characters long',
   /**
    * When a value does not match a given pattern
    */
-  error_pattern: "Value must match the provided pattern",
+  errorPattern: 'Value must match the provided pattern',
   /**
    * When an array has additional items whereas it is not supposed to
    */
-  error_additionalItems: "No additional items allowed in this array",
+  errorAdditionalItems: 'No additional items allowed in this array',
   /**
    * When there are to many items in an array
    * @variables This key takes one variable: The maximum item count
    */
-  error_maxItems: "Value must have at most {{0}} items",
+  errorMaxItems: 'Value must have at most {{0}} items',
   /**
    * When there are not enough items in an array
    * @variables This key takes one variable: The minimum item count
    */
-  error_minItems: "Value must have at least {{0}} items",
+  errorMinItems: 'Value must have at least {{0}} items',
   /**
    * When an array is supposed to have unique items but has duplicates
    */
-  error_uniqueItems: "Array must have unique items",
+  errorUniqueItems: 'Array must have unique items',
   /**
    * When there are too many properties in an object
    * @variables This key takes one variable: The maximum property count
    */
-  error_maxProperties: "Object must have at most {{0}} properties",
+  errorMaxProperties: 'Object must have at most {{0}} properties',
   /**
    * When there are not enough properties in an object
    * @variables This key takes one variable: The minimum property count
    */
-  error_minProperties: "Object must have at least {{0}} properties",
+  errorMinProperties: 'Object must have at least {{0}} properties',
   /**
    * When a required property is not defined
    * @variables This key takes one variable: The name of the missing property
    */
-  error_required: "Object is missing the required property '{{0}}'",
+  errorRequired: 'Object is missing the required property "{{0}}"',
   /**
    * When there is an additional property is set whereas there should be none
    * @variables This key takes one variable: The name of the additional property
    */
-  error_additional_properties: "No additional properties allowed, but property {{0}} is set",
+  errorAdditionalProperties: 'No additional properties allowed, but property {{0}} is set',
   /**
    * When a dependency is not resolved
    * @variables This key takes one variable: The name of the missing property for the dependency
    */
-  error_dependency: "Must have property {{0}}"
+  errorDependency: 'Must have property {{0}}'
 };
 
 // Miscellaneous Plugin Settings
@@ -7296,88 +7304,88 @@ JSONEditor.plugins = {
 
 // Default per-editor options
 for(var i in JSONEditor.defaults.editors) {
-  if(!JSONEditor.defaults.editors.hasOwnProperty(i)) continue;
+   if(!JSONEditor.defaults.editors.hasOwnProperty(i)) { continue; }
   JSONEditor.defaults.editors[i].options = JSONEditor.defaults.editors.options || {};
 }
 
 // Set the default resolvers
-// Use "multiple" as a fall back for everything
+// Use 'multiple' as a fall back for everything
 JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(typeof schema.type !== "string") return "multiple";
+   if(typeof schema.type !== 'string') { return 'multiple'; }
 });
 // If the type is set and it's a basic type, use the primitive editor
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   // If the schema is a simple type
-  if(typeof schema.type === "string") return schema.type;
+   if(typeof schema.type === 'string') { return schema.type; }
 });
 // Boolean editors
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   if(schema.type === 'boolean') {
     // If explicitly set to 'checkbox', use that
-    if(schema.format === "checkbox" || (schema.options && schema.options.checkbox)) {
-      return "checkbox";
+    if(schema.format === 'checkbox' || (schema.options && schema.options.checkbox)) {
+      return 'checkbox';
     }
     // Otherwise, default to select menu
-    return "select";
+    return 'select';
   }
 });
-// Use the multiple editor for schemas where the `type` is set to "any"
+// Use the multiple editor for schemas where the `type` is set to 'any'
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   // If the schema can be of any type
-  if(schema.type === "any") return "multiple";
+   if(schema.type === 'any') { return 'multiple'; }
 });
 // Editor for base64 encoded files
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   // If the schema can be of any type
-  if(schema.type === "string" && schema.media && schema.media.binaryEncoding==="base64") {
-    return "base64";
+  if(schema.type === 'string' && schema.media && schema.media.binaryEncoding==='base64') {
+    return 'base64';
   }
 });
 // Editor for uploading files
 JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema.type === "string" && schema.format === "url" && schema.options && schema.options.upload === true) {
-    if(window.FileReader) return "upload";
+  if(schema.type === 'string' && schema.format === 'url' && schema.options && schema.options.upload === true) {
+     if(window.FileReader) { return 'upload'; }
   }
 });
 // Use the table editor for arrays with the format set to `table`
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   // Type `array` with format set to `table`
-  if(schema.type == "array" && schema.format == "table") {
-    return "table";
+  if(schema.type === 'array' && schema.format === 'table') {
+    return 'table';
   }
 });
 // Use the `select` editor for dynamic enumSource enums
 JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema.enumSource) return "select";
+   if(schema.enumSource) { return 'select'; }
 });
 // Use the `enum` or `select` editors for schemas with enumerated properties
 JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema["enum"]) {
-    if(schema.type === "array" || schema.type === "object") {
-      return "enum";
+  if(schema['enum']) {
+    if(schema.type === 'array' || schema.type === 'object') {
+      return 'enum';
     }
-    else if(schema.type === "number" || schema.type === "integer" || schema.type === "string") {
-      return "select";
+    else if(schema.type === 'number' || schema.type === 'integer' || schema.type === 'string') {
+      return 'select';
     }
   }
 });
 // Use the 'multiselect' editor for arrays of enumerated strings/numbers/integers
 JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema.type === "array" && schema.items && !(Array.isArray(schema.items)) && schema.uniqueItems && schema.items["enum"] && ['string','number','integer'].indexOf(schema.items.type) >= 0) {
+  if(schema.type === 'array' && schema.items && !(Array.isArray(schema.items)) && schema.uniqueItems && schema.items['enum'] && ['string','number','integer'].indexOf(schema.items.type) >= 0) {
     return 'multiselect';
   }
 });
 // Use the multiple editor for schemas with `oneOf` set
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   // If this schema uses `oneOf`
-  if(schema.oneOf) return "multiple";
+   if(schema.oneOf) { return 'multiple'; }
 });
 
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   if (schema.links) {
     for (var i = 0; i < schema.links.length; i++) {
-      if (schema.links[i].rel.toLowerCase() === "describedby") {
-        return "describedBy";
+      if (schema.links[i].rel.toLowerCase() === 'describedby') {
+        return 'describedBy';
       }
     }
   }
@@ -7395,7 +7403,7 @@ JSONEditor.defaults.resolvers.unshift(function(schema) {
       var self = this;
       var editor = this.data('jsoneditor');
       if(options === 'value') {
-        if(!editor) throw "Must initialize jsoneditor before getting/setting the value";
+         if(!editor) { throw 'Must initialize jsoneditor before getting/setting the value'; }
         
         // Set value
         if(arguments.length > 1) {
@@ -7407,7 +7415,7 @@ JSONEditor.defaults.resolvers.unshift(function(schema) {
         }
       }
       else if(options === 'validate') {
-        if(!editor) throw "Must initialize jsoneditor before validating";
+         if(!editor) { throw 'Must initialize jsoneditor before validating'; }
         
         // Validate a specific value
         if(arguments.length > 1) {
