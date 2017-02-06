@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-angular.module("homeuiApp")
-  .factory("Spinner", function ($rootScope) {
+angular.module('homeuiApp')
+  .factory('Spinner', function ($rootScope) {
     var spinner = Object.create(null);
 
     function isActive (prefix) {
       for (var k in spinner) {
-        if (prefix === undefined || k.replace(/\s+.*$/, "") == prefix) {
+        if (prefix === undefined || k.replace(/\s+.*$/, '') === prefix) {
           return true;
         }
       }
@@ -16,7 +16,7 @@ angular.module("homeuiApp")
     $rootScope.spinnerActive = isActive;
 
     function fullId (id, suffix) {
-      return suffix === undefined ? id : id + " " + suffix;
+      return suffix === undefined ? id : id + ' ' + suffix;
     }
 
     return {

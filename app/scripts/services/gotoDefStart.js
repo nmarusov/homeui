@@ -1,14 +1,15 @@
-"use strict";
+'use strict';
 
-angular.module("homeuiApp")
-  .factory("gotoDefStart", function () {
+angular.module('homeuiApp')
+  .factory('gotoDefStart', function () {
     function mapTokensBackward (cm, func) {
       var cur = cm.getCursor();
       for (var line = cur.line; line >= 0; line--) {
         var tokens = cm.getLineTokens(line);
         for (var i = tokens.length - 1; i >= 0; i--) {
-          if (func(tokens[i], line))
+          if (func(tokens[i], line)) {
             return;
+          }
         }
       }
     }
@@ -20,25 +21,29 @@ angular.module("homeuiApp")
       var state = STATE_FIND_CLOSING_PAREN,
           level = 1;
       mapTokensBackward(cm, function (token, line) {
-        // console.log("state=" + state + "; type=" + token.type + "; string=" + token.string);
+        // console.log('state=' + state + '; type=' + token.type + '; string=' + token.string);
         switch (state) {
         case STATE_FIND_CLOSING_PAREN:
-          if (token.string == ")")
+          if (token.string === ')') {
             state = STATE_FIND_OPEN_PAREN;
+          }
           return false;
         case STATE_FIND_OPEN_PAREN:
-          if (token.string == ")")
+          if (token.string === ')') {
             level++;
-          else if (token.string == "(" && !--level)
+          }
+          else if (token.string === '(' && !--level) {
             state = STATE_FIND_BEGINNING;
+          }
           return false;
         case STATE_FIND_BEGINNING:
-          if (token.type == "variable") {
+          if (token.type === 'variable') {
             cm.setCursor(line, token.start);
             return true;
           }
+          return false;
         default:
-          throw new Error("bad state");
+          throw new Error('bad state');
         }
       });
     };
