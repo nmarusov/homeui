@@ -1,27 +1,27 @@
-"use strict";
+'use strict';
 
-angular.module("homeuiApp")
-  .directive("scriptForm", function (PageState) {
+angular.module('homeuiApp')
+  .directive('scriptForm', function (PageState) {
     return {
-      restrict: "A",
+      restrict: 'A',
       link: function (scope, element) {
-        var formCtrl = scope[element.attr("name")];
-        scope.$watch(element.attr("name") + ".$dirty", function (newValue) {
+        var formCtrl = scope[element.attr('name')];
+        scope.$watch(element.attr('name') + '.$dirty', function (newValue) {
           PageState.setDirty(newValue);
         });
       }
     };
   })
-  .controller("ScriptCtrl", function ($scope, $routeParams, $timeout, EditorProxy, whenMqttReady, gotoDefStart, $location, PageState, errors) {
+  .controller('ScriptCtrl', function ($scope, $routeParams, $timeout, EditorProxy, whenMqttReady, gotoDefStart, $location, PageState, errors) {
     var cm, pos = null;
     $scope.canSave = function () {
       return PageState.isDirty();
     };
     $scope.file = {
-      isNew: !$routeParams.hasOwnProperty("path"),
+      isNew: !$routeParams.hasOwnProperty('path'),
       path: $routeParams.path,
       loaded: false,
-      content: ""
+      content: ''
     };
 
     if (!$scope.file.isNew) {
@@ -39,54 +39,59 @@ angular.module("homeuiApp")
 
     function showError (message, traceback, setCursor) {
       var errorLine = null;
-      errors.showError("Script error", message);
+      errors.showError('Script error', message);
 
-      if (!traceback || !traceback.length)
+      if (!traceback || !traceback.length) {
         return;
+      }
 
       for (var i = 0; i < traceback.length; i++) {
-        if (traceback[i].name == $scope.file.path) {
+        if (traceback[i].name === $scope.file.path) {
           errorLine = traceback[i].line - 1;
           break;
         }
       }
-      if (errorLine != null)
+      if (errorLine !== null) {
         $timeout(function () {
-          cm.addLineClass(errorLine, "wrap", "script-error-line");
+          cm.addLineClass(errorLine, 'wrap', 'script-error-line');
           cm.markText({ line: errorLine, ch: 0 },
                       { line: errorLine + 1, ch: 0 },
-                      { title: message.replace(/\n.*/g, "") });
+                      { title: message.replace(/\n.*/g, '') });
           if (setCursor) {
             // FIXME: this scrollIntoView() doesn't seem to work here
             // cm.scrollIntoView({ line: errorLine, ch: 0 });
             cm.setCursor(errorLine, 0);
-            $(".script-error-line").get(0).scrollIntoView();
+            $('.script-error-line').get(0).scrollIntoView();
           }
         });
+      }
     }
 
     // AngularJS expression parser seemingly chokes on Infinity,
     // thinks its a variable name (?)
     $scope.vpMargin = Infinity;
     $scope.save = function save () {
-      if (!$scope.file.isNew && !$scope.file.loaded)
+      if (!$scope.file.isNew && !$scope.file.loaded) {
         return;
+      }
       EditorProxy.Save({ path: $scope.file.path, content: $scope.file.content })
         .then(function (reply) {
           if ($scope.file.isNew || pos !== null) {
             // clear pos in the url after saving to be able
             // to navigate to errors
-            $location.path("/scripts/edit/" + reply.path);
+            $location.path('/scripts/edit/' + reply.path);
           } else {
             cm.focus();
             cm.setValue(cm.getValue()); // clear line classes / marks
-            if (reply.error)
+            if (reply.error) {
               showError(reply.error, reply.traceback);
-            else
+            }
+            else {
               errors.hideError();
+            }
           }
         })
-        .catch(errors.catch("Error saving the file"));
+        .catch(errors.catch('Error saving the file'));
     };
 
     if (!$scope.file.isNew) {
@@ -100,17 +105,18 @@ angular.module("homeuiApp")
             cm.setCursor(pos.line, pos.ch);
             // FIXME: this scrollIntoView() doesn't seem to work here
             // cm.scrollIntoView(pos);
-            cm.addLineClass(pos.line, "wrap", "script-target-line");
-            $(".script-target-line").get(0).scrollIntoView();
+            cm.addLineClass(pos.line, 'wrap', 'script-target-line');
+            $('.script-target-line').get(0).scrollIntoView();
             gotoDefStart(cm);
           });
         }
-        if (r.error)
+        if (r.error) {
           showError(
             r.error.message,
             r.error.traceback,
             // only jump to error location if postition wasn't specified
             pos === null);
-      }).catch(errors.catch("Error loading the file"));
+        }
+      }).catch(errors.catch('Error loading the file'));
     }
   });

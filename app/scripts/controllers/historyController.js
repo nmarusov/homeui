@@ -1,26 +1,27 @@
-"use strict";
+'use strict';
 
-angular.module("homeuiApp")
-  .controller("HistoryCtrl", function ($scope, $routeParams, $location, HistoryProxy,
+angular.module('homeuiApp')
+  .controller('HistoryCtrl', function ($scope, $routeParams, $location, HistoryProxy,
                                        whenMqttReady, errors, CommonCode, historyMaxPoints,
                                        $timeout) {
     $scope.datapoints = [];
     $scope.controls = [];
     $scope.datacolumns = [
-      { "id":"y", "type":"line", "color":"green" }
+      { 'id':'y', 'type':'line', 'color':'green' }
     ];
-    $scope.datax = { "id":"x" };
+    $scope.datax = { 'id':'x' };
 
     function convDate (ts) {
-      if (ts == null || ts == "-")
+      if (ts === null || ts === '-') {
         return null;
+      }
       var d = new Date();
       d.setTime(ts - 0);
       return d;
     }
 
     $scope.topic = $routeParams.device && $routeParams.control ?
-      $routeParams.device + "/" + $routeParams.control :
+      $routeParams.device + '/' + $routeParams.control :
       null;
     
 
@@ -33,12 +34,13 @@ angular.module("homeuiApp")
     };
 
     function parseTopic (topic) {
-      if (!topic)
+      if (!topic) {
         return null;
+      }
 
       var m = topic.match(/^([^\/]+)\/([^\/]+)/);
       if (!m) {
-        console.warn("bad topic: %s", topic);
+        console.warn('bad topic: %s', topic);
         return null;
       }
       return {
@@ -52,22 +54,24 @@ angular.module("homeuiApp")
     $scope.selectedEndDate = $scope.endDate;
 
     function maybeUpdateUrl (newValue, oldValue) {
-      if (newValue === oldValue || !$scope.selectedTopic)
+      if (newValue === oldValue || !$scope.selectedTopic) {
         return;
+        }
 
       var parsedTopic = parseTopic($scope.selectedTopic);
-      if (!parsedTopic)
+      if (!parsedTopic) {
         return;
+      }
 
-      $location.path("/history/" + [
+      $location.path('/history/' + [
         parsedTopic.deviceId,
         parsedTopic.controlId,
-        $scope.selectedStartDate ? $scope.selectedStartDate.getTime() : "-",
-        $scope.selectedEndDate ? $scope.selectedEndDate.getTime() : "-"
-      ].join("/"));
+        $scope.selectedStartDate ? $scope.selectedStartDate.getTime() : '-',
+        $scope.selectedEndDate ? $scope.selectedEndDate.getTime() : '-'
+      ].join('/'));
     }
 
-    ["selectedTopic", "selectedStartDate", "selectedEndDate"].forEach(function (expr) {
+    ['selectedTopic', 'selectedStartDate', 'selectedEndDate'].forEach(function (expr) {
       $scope.$watch(expr, maybeUpdateUrl);
     });
 
@@ -90,12 +94,14 @@ angular.module("homeuiApp")
       }
 
       loadPending = false;
-      if (!$scope.topic)
+      if (!$scope.topic) {
         return;
+      }
 
       var parsedTopic = parseTopic($scope.topic);
-      if (!parseTopic)
+      if (!parseTopic) {
         return;
+      }
 
       var params = {
         channels: [
@@ -121,14 +127,15 @@ angular.module("homeuiApp")
 	var endDate = $scope.endDate || Date.now();
 	var intervalMs = endDate - $scope.startDate; // duration of requested interval, in ms
 
-	// we want to request  no more than "limit" data points.
+	// we want to request  no more than 'limit' data points.
 	// Additional divider 1.1 is here just to be on the safe side
-	params.min_interval = intervalMs / params.limit * 1.1;
+	params.minInterval = intervalMs / params.limit * 1.1;
       }
 
-      HistoryProxy.get_values(params).then(function (result) {
-        if (result.has_more)
-          errors.showError("Warning", "maximum number of points exceeded. Please select start date.");
+      HistoryProxy.getValues(params).then(function (result) {
+        if (result.hasMore) {
+          errors.showError('Warning', 'maximum number of points exceeded. Please select start date.');
+        }
         $scope.datapoints = result.values.map(function (item) {
           var ts = new Date();
           ts.setTime(item.t * 1000);
@@ -137,47 +144,49 @@ angular.module("homeuiApp")
             y: item.v - 0
           };
         });
-      }).catch(errors.catch("Error getting history"));
+      }).catch(errors.catch('Error getting history'));
     }
 
     whenMqttReady().then(function () {
 
       ready = true;
 
-      // console.log("Looks like MQTT is connnected! Try to load channels");
+      // console.log('Looks like MQTT is connnected! Try to load channels');
       // get controls
-      HistoryProxy.get_channels({}).then(function (result) {
+      HistoryProxy.getChannels({}).then(function (result) {
         // into $scope.controls -> channels
         // control.topic is our required value
-        console.log("Hey, got channels! %o", result);
+        console.log('Hey, got channels! %o', result);
 
         Object.keys(result.channels).sort().forEach(function(key) {
-          // console.log("Channel data $o -> $o", k, value[k]);
+          // console.log('Channel data $o -> $o', k, value[k]);
           if (result.channels[key].items > 0) {
             var m = key.match(/^([^\/]+)\/([^\/]+)/);
             if (!m) {
-              errors.showError("Error", "bad reply from mqtt-db: " + key);
+              errors.showError('Error', 'bad reply from mqtt-db: ' + key);
               return;
             }
 
-            $scope.controls.push({ topic: m[1] + "/" + m[2] });
+            $scope.controls.push({ topic: m[1] + '/' + m[2] });
           }
         });
       }, function(reason) {
-        console.error("Failed to get channels list: %o", reason);
-      }).catch(errors.catch("Error getting channels list"));
+        console.error('Failed to get channels list: %o', reason);
+      }).catch(errors.catch('Error getting channels list'));
 
 
-      if (loadPending)
+      if (loadPending) {
         loadHistory();
+      }
     });
 
     function loadHistoryOnChange(newValue, oldValue) {
-      if (newValue !== oldValue)
+      if (newValue !== oldValue) {
         loadHistory();
+      }
     }
 
-    $scope.$watch("topic", loadHistoryOnChange);
-    $scope.$watch("startDate", loadHistoryOnChange);
-    $scope.$watch("endDate", loadHistoryOnChange);
+    $scope.$watch('topic', loadHistoryOnChange);
+    $scope.$watch('startDate', loadHistoryOnChange);
+    $scope.$watch('endDate', loadHistoryOnChange);
   });

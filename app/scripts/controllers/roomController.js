@@ -4,7 +4,7 @@ angular.module('homeuiApp')
   .controller('RoomCtrl', ['$scope', '$routeParams', '$rootScope', 'CommonCode', function($scope, $routeParams, $rootScope, CommonCode){
     $scope.data = CommonCode.data;
     $scope.rooms = $scope.data.rooms;
-    $scope.all_widgets = $scope.data.widgets;
+    $scope.allWidgets = $scope.data.widgets;
     $scope.action = 'New';
     $scope.widgets = {};
 
@@ -16,19 +16,19 @@ angular.module('homeuiApp')
         $scope.room = $scope.rooms[$routeParams.id];
         if($scope.room){
           $scope.$watch('room.widgets.length', function(){
-			var new_widgets = {};
+      var newWidgets = {};
 
-            $scope.room.widgets.forEach(function(widget_uid) {
-              if ($scope.all_widgets.hasOwnProperty(widget_uid)) {
-                new_widgets[widget_uid] = $scope.all_widgets[widget_uid];
-              };
+            $scope.room.widgets.forEach(function(widgetUid) {
+              if ($scope.allWidgets.hasOwnProperty(widgetUid)) {
+                newWidgets[widgetUid] = $scope.allWidgets[widgetUid];
+              }
             });
 
-			$scope.widgets = new_widgets;
+      $scope.widgets = newWidgets;
           });
-        };
+        }
       });
-    };
+    }
 
     $scope.hoverIn = function(widget){
       widget.canEdit = true;

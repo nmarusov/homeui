@@ -7,16 +7,16 @@ angular.module('homeuiApp')
     $scope.widgets = $scope.data.widgets;
     $scope.rooms = $scope.data.rooms;
     $scope.controls = $scope.data.controls;
-    $scope.widgetTemplates = $scope.data.widget_templates;
+    $scope.widgetTemplates = $scope.data.widgetTemplates;
     $scope.widget = { controls: {}, options: {} };
     $scope.action = 'New';
 
-    if($routeParams.id){
+    if ($routeParams.id){
       $scope.action = 'Edit';
       $scope.widgetID = $routeParams.id;
       $scope.$watch('widgets.' + $scope.widgetID, function(){
         $scope.widget = $scope.widgets[$scope.widgetID];
-        if($scope.widget){
+        if ($scope.widget) {
           $scope.$watch('widget.room', function(){
             $scope.$watch('rooms.' + $scope.widget.room, function(){
               $scope.room = $scope.rooms[$scope.widget.room];
@@ -27,10 +27,10 @@ angular.module('homeuiApp')
               $scope.template = $scope.widgetTemplates[$scope.widget.template];
             });
           });
-          delete $scope.widget['canEdit'];
-        };
+          delete $scope.widget.canEdit;
+        }
       });
-    };
+    }
 
     $scope.deleteWidget = CommonCode.deleteWidget;
 
@@ -50,30 +50,30 @@ angular.module('homeuiApp')
       $scope.widget.template = $scope.template.uid;
 
       if (!$scope.widget.uid) {
-			var max_uid_index = 0;
-			for (var key in $scope.widgets) {
-				var  uid_index = parseInt(key.slice("widget".length));
-				if (uid_index > max_uid_index) {
-					max_uid_index = uid_index;
-				}
-			}
+      var maxUidIndex = 0;
+      for (var key in $scope.widgets) {
+        var  uidIndex = parseInt(key.slice('widget'.length));
+        if (uidIndex > maxUidIndex) {
+          maxUidIndex = uidIndex;
+        }
+      }
 
-		  $scope.widget.uid = "widget" + (max_uid_index + 1);
-	  }
+      $scope.widget.uid = 'widget' + (maxUidIndex + 1);
+    }
 
 
 
       var topic = '/config/widgets/' + $scope.widget.uid;
 
 
-      $scope.mqtt_widget = angular.copy($scope.widget);
+      $scope.mqttWidget = angular.copy($scope.widget);
 
-      for(var c in $scope.mqtt_widget.controls){
-        var control = $scope.mqtt_widget.controls[c];
-        $scope.mqtt_widget.controls[control.uid] = { uid: control.uid, topic: control.topic.topic };
-      };
+      for(var c in $scope.mqttWidget.controls){
+        var control = $scope.mqttWidget.controls[c];
+        $scope.mqttWidget.controls[control.uid] = { uid: control.uid, topic: control.topic.topic };
+      }
 
-      $scope.mqttSendCollection(topic, $scope.mqtt_widget, $rootScope.refererLocation);
+      $scope.mqttSendCollection(topic, $scope.mqttWidget, $rootScope.refererLocation);
 
       console.log('Successfully created!');
     };
@@ -84,11 +84,11 @@ angular.module('homeuiApp')
       if($scope.template){
         for(var slot in $scope.template.slots){
           $scope.widget.controls[slot] = { uid: slot };
-        };
+        }
         for(var option in $scope.template.options){
           $scope.widget.options[option] = { uid: option };
-        };
-      };
+        }
+      }
     };
   }])
   .directive('widget', function(){

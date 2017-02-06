@@ -1,17 +1,18 @@
-"use strict";
+'use strict';
 
-angular.module("homeuiApp")
-  .controller("ConfigCtrl", function ($scope, $routeParams, $timeout, ConfigEditorProxy, whenMqttReady, gotoDefStart, $location, PageState, errors) {
+angular.module('homeuiApp')
+  .controller('ConfigCtrl', function ($scope, $routeParams, $timeout, ConfigEditorProxy, whenMqttReady, gotoDefStart, $location, PageState, errors) {
     $scope.file = {
       schemaPath: $routeParams.path,
-      configPath: "",
+      configPath: '',
       loaded: false,
       valid: true,
       content: {}
     };
     $scope.editorOptions = {};
-    if (!/^\//.test($scope.file.schemaPath))
-      $scope.file.schemaPath = "/" + $scope.file.schemaPath;
+    if (!/^\//.test($scope.file.schemaPath)) {
+      $scope.file.schemaPath = '/' + $scope.file.schemaPath;
+    }
 
     $scope.canSave = function () {
       return PageState.isDirty() && $scope.file.valid;
@@ -28,30 +29,32 @@ angular.module("homeuiApp")
     var load = function() {
       ConfigEditorProxy.Load({ path: $scope.file.schemaPath })
       .then(function (r) {
-        $scope.editorOptions = r.schema.strictProps ? { no_additional_properties: true } : {};
-        if (r.schema.limited)
+        $scope.editorOptions = r.schema.strictProps ? { noAdditionalProperties: true } : {};
+        if (r.schema.limited) {
           angular.extend($scope.editorOptions, {
-            disable_properties: true,
-            disable_edit_json: true
+            disableProperties: true,
+            disableEditJson: true
           });
+        }
         $scope.file.configPath = r.configPath;
         $scope.file.content = r.content;
         $scope.file.schema = r.schema;
         $scope.file.loaded = true;
       })
-      .catch(errors.catch("Error loading the file"));
+      .catch(errors.catch('Error loading the file'));
     };
 
     $scope.save = function () {
       PageState.setDirty(false);
       ConfigEditorProxy.Save({ path: $scope.file.schemaPath, content: $scope.file.content })
         .then(function() {
-          if ($scope.file.schema.needReload)
+          if ($scope.file.schema.needReload) {
             load();
+          }
         })
         .catch(function (e) {
           PageState.setDirty(true);
-          errors.showError("Error saving " + $scope.file.configPath, e);
+          errors.showError('Error saving ' + $scope.file.configPath, e);
         });
     };
 

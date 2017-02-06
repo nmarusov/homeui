@@ -14,7 +14,7 @@ angular.module('homeuiApp')
       $scope.$watch('dashboards.' + $scope.dashboardID, function(){
         $scope.dashboard = $scope.dashboards[$scope.dashboardID];
       });
-    };
+    }
 
     $scope.hoverIn = function(dashboard){
       dashboard.canEdit = true;
@@ -25,14 +25,14 @@ angular.module('homeuiApp')
     };
 
     $scope.addWidget = function (dashboard) {
-      var widgetName = "widget" + $rootScope.objectsKeys(dashboard.widgets).length;
+      var widgetName = 'widget' + $rootScope.objectsKeys(dashboard.widgets).length;
       dashboard.widgets[widgetName] = {};//{ name:'', uid: widgetName };
     };
 
 
     $scope.dashboardDeleteWidget = function (widget) {
         for(var w in $scope.dashboard.widgets){
-			if ($scope.dashboard.widgets[w].uid == widget.uid) {
+			if ($scope.dashboard.widgets[w].uid === widget.uid) {
 				console.log(widget);
 				console.log(w);
 
@@ -47,12 +47,12 @@ angular.module('homeuiApp')
 		console.log($scope.dashboards);
 		console.log(dashboard);
         for(var key in $scope.dashboards){
-			if ($scope.dashboards[key] == dashboard) {
+			if ($scope.dashboards[key] === dashboard) {
 				var uid = dashboard.uid;
 				delete $scope.dashboards[key];
 				$scope.mqttDeleteByPrefix( '/config/dashboards/' + uid + '/');
 
-				if ($scope.data.defaults.dashboard == uid) {
+				if ($scope.data.defaults.dashboard === uid) {
 					$scope.data.defaults.dashboard = '';
 			        mqttClient.send('/config/default_dashboard/uid', '');
 				}
@@ -65,19 +65,19 @@ angular.module('homeuiApp')
     $scope.addOrUpdateDashboard = function(){
       console.log('Start creating...');
 
-      delete $scope.dashboard['canEdit'];
+      delete $scope.dashboard.canEdit;
 
 
       if (!$scope.dashboard.uid) {
-			var max_uid_index = 0;
+			var maxUidIndex = 0;
 			for (var key in $scope.dashboards) {
-				var  uid_index = parseInt(key.slice("dashboard".length));
-				if (uid_index > max_uid_index) {
-					max_uid_index = uid_index;
+				var  uidIndex = parseInt(key.slice('dashboard'.length));
+				if (uidIndex > maxUidIndex) {
+					maxUidIndex = uidIndex;
 				}
 			}
 
-		  $scope.dashboard.uid = "dashboard" + (max_uid_index + 1);
+		  $scope.dashboard.uid = 'dashboard' + (maxUidIndex + 1);
       }
 
 
@@ -87,12 +87,12 @@ angular.module('homeuiApp')
 
       for(var w in dashboard.widgets){
         var widget = dashboard.widgets[w];
-        if (widget == null) {
+        if (widget === null) {
             delete dashboard.widgets[w];
             $scope.mqttDeleteByPrefix( topic + '/widgets/' + w + '/');
         } else {
             dashboard.widgets[w] = widget;
-        };
+        }
       }
 
 

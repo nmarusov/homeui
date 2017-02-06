@@ -9,7 +9,7 @@ angular.module('homeuiApp')
     $scope.rooms = $scope.data.rooms;
     $scope.dashboards = $scope.data.dashboards;
     $scope.widgets = $scope.data.widgets;
-    $scope.widget_templates = $scope.data.widget_templates;
+    $scope.widgetTemplates = $scope.data.widgetTemplates;
     $scope.isConnected = function () {
       return mqttClient.isConnected();
     };
@@ -20,7 +20,7 @@ angular.module('homeuiApp')
 
     whenMqttReady().then(function () {
       needToLoadScripts = needToLoadConfigs = true;
-      mqttClient.subscribe("/wbrules/updates/+", function () {
+      mqttClient.subscribe('/wbrules/updates/+', function () {
         needToLoadScripts = true;
       });
     });
@@ -48,9 +48,9 @@ angular.module('homeuiApp')
         needToLoadScripts = false;
         EditorProxy.List().then(function (result) {
           scripts = result;
-          rules = collectLocs(scripts, "rules");
-          devices = collectLocs(scripts, "devices");
-        }).catch(errors.catch("Error listing the scripts"));
+          rules = collectLocs(scripts, 'rules');
+          devices = collectLocs(scripts, 'devices');
+        }).catch(errors.catch('Error listing the scripts'));
       }
       return scripts;
     };
@@ -70,7 +70,7 @@ angular.module('homeuiApp')
         needToLoadConfigs = false;
         ConfigEditorProxy.List().then(function (result) {
           configs = result;
-        }).catch(errors.catch("Error listing the configs"));
+        }).catch(errors.catch('Error listing the configs'));
       }
       return configs;
     };
