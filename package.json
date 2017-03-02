@@ -51,6 +51,8 @@
     "node": "7.5.0"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "build": "grunt --force",
+    "start": "grunt serve"
   }
 }
